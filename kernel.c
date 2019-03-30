@@ -49,7 +49,9 @@ int main() {
    //int sectors = 1;
    
    makeInterrupt21();
-   interrupt(0x21, 0x00, "Hi", 0, 0, 0);
+   //interrupt(0x21, 0x00, "Hi", 0, 0, 0);
+   makeDirectory("home\0",0,0xFF);
+   makeDirectory("home/bin\0",0,0xFF);
    while (1);
 }
 
@@ -157,12 +159,74 @@ int div(int a, int b) {
    return q-1;
 }
 
+void clear(char *buffer, int length) {
+   int i;
+   for(i = 0; i < length; ++i) {
+      buffer[i] = EMPTY;
+   }
+}
+
 void readSector(char *buffer, int sector){
    interrupt(0x13, 0x201, buffer, div(sector, 36) * 0x100 + mod(sector, 18) + 1, mod(div(sector, 18), 2) * 0x100);
 }
 
 void writeSector(char *buffer, int sector){
    interrupt(0x13, 0x301, buffer, div(sector, 36) * 0x100 + mod(sector, 18) + 1, mod(div(sector, 18), 2) * 0x100);
+}
+
+void relPathToAbsPath(char *path, char *parentIndex, int *success){
+   char dirs[SECTOR_SIZE];
+   char currpath[MAX_FILENAME];
+   int i, j, k, isEqual, isLastPathDone, isDirnameDone;
+   j = 0;   //Variabel untuk menghitung panjang path yang sudah dibaca
+   isLastPathDone = FALSE;
+   
+   readSector(dirs, DIRS_SECTOR);
+   //Traversal setiap folder di path 
+   while (!isLastPathDone){
+      //Menyimpan nama folder saat ini di currpath
+      clear(currpath,MAX_FILENAME);
+      k = 0;
+      isDirnameDone = FALSE;
+      do{
+         if (path[j+k] == '/'){
+            isDirnameDone = TRUE;
+         }else if (path[j+k] == '\0'){
+            isDirnameDone = TRUE;
+            isLastPathDone = TRUE;
+         }else{  
+            currpath[k] = path[j+k];
+         }
+         k++;
+      }while(k < MAX_DIRNAME && !isDirnameDone);
+      j += k;
+
+      if (!isLastPathDone){
+         //Traversal dirs untuk mencari folder currpath
+         i = 0;   //Variabel untuk traversal sektor dirs
+         while (i*DIRS_ENTRY_LENGTH < SECTOR_SIZE){
+            isEqual = isEqualPathName(currpath,dirs+i*DIRS_ENTRY_LENGTH+1);
+            if (isEqual && dirs[i*DIRS_ENTRY_LENGTH] == *parentIndex){
+               *parentIndex = i;
+               break;
+            }else{
+               i++;
+            }
+         }
+         //Folder currpath tidak ditemukan
+         if (i == MAX_DIRS){
+            *success = NOT_FOUND;
+            return;
+         }   
+      }
+   }
+   //Menandakan success
+   clear(path,MAX_FILENAME);
+   *success = 0;
+   for(i = 0; i < MAX_FILENAME; i++){
+      path[i] = currpath[i];
+      if (currpath[i] == '\0') break;
+   }
 }
 
 int isEqualPathName(char *path1, char *path2){
@@ -181,55 +245,21 @@ void readFile(char *buffer, char *path, int *result, char parentIndex){
    char dirs[SECTOR_SIZE];
    char files[SECTOR_SIZE];
    char sectors[SECTOR_SIZE];
-   char currpath[15];
-   int i,j,k,isEqual,isDirnameDone,isFilenameDone;
-   
-   j = 0;   //Variabel untuk menghitung panjang path yang sudah dibaca
-   isFilenameDone = FALSE;
+   int i,isEqual,success;
    
    readSector(dirs, DIRS_SECTOR);
-   //Traversal setiap folder di path 
-   while (!isFilenameDone){
-      //Menyimpan nama folder saat ini di currpath
-      k = 0;
-      isDirnameDone = FALSE;
-      do{
-         if (path[j+k] == '/'){
-            isDirnameDone = TRUE;
-         }else if (path[j+k] == '\0'){
-            isDirnameDone = TRUE;
-            isFilenameDone = TRUE;
-         }else{  
-            currpath[k] = path[j+k];
-         }
-         k++;
-      }while(k < MAX_DIRNAME && !isDirnameDone);
-      j += k;
-      
-      //Traversal dirs untuk mencari folder currpath
-      if (!isFilenameDone){
-         i = 0;   //Variabel untuk traversal sektor dirs
-         while (i*DIRS_ENTRY_LENGTH < SECTOR_SIZE){
-            isEqual = isEqualPathName(currpath,dirs+i*DIRS_ENTRY_LENGTH+1);
-            if (isEqual && dirs[i*DIRS_ENTRY_LENGTH] == parentIndex){
-               parentIndex = i;
-               break;
-            }else{
-               i++;
-            }
-         }
-         //Folder currpath tidak ditemukan
-         if (i == MAX_DIRS){
-            *result = NOT_FOUND;
-            return;
-         }   
-      }
+   //Mengubah relative path menjadi path absolute dengan parent index yang sesuai
+   relPathToAbsPath(path, parentIndex, &success);
+
+   if (success != 0){
+      *result = success;
+      return;
    }
    
    readSector(files, FILES_SECTOR);
    i = 0;   //Variabel untuk traversal sektor files
    while (i*DIRS_ENTRY_LENGTH < SECTOR_SIZE){
-      isEqual = isEqualPathName(currpath,files+i*DIRS_ENTRY_LENGTH+1);
+      isEqual = isEqualPathName(path,files+i*DIRS_ENTRY_LENGTH+1);
       if (isEqual && files[i*DIRS_ENTRY_LENGTH] == parentIndex){
          parentIndex = i;
          break; 
@@ -253,21 +283,13 @@ void readFile(char *buffer, char *path, int *result, char parentIndex){
    *result = 0;
 }
 
-void clear(char *buffer, int length) {
-   int i;
-   for(i = 0; i < length; ++i) {
-      buffer[i] = EMPTY;
-   }
-}
-
 void writeFile(char *buffer, char *path, int *sectors, char parentIndex){
    char map[SECTOR_SIZE];
    char dirs[SECTOR_SIZE];
    char files[SECTOR_SIZE];
    char filesect[SECTOR_SIZE];
    char sectorBuffer[SECTOR_SIZE];
-   char currpath[15];
-   int i,j,k,isEqual,isDirnameDone,isFilenameDone,sectorCount,fileIndex;
+   int i,j,k,isEqual,sectorCount,fileIndex,success;
    
    //Menentukan apakah sisa sector masih tersedia untuk menampung file baru
    readSector(map, MAP_SECTOR);
@@ -282,48 +304,14 @@ void writeFile(char *buffer, char *path, int *sectors, char parentIndex){
       return;
    }
    
-   j = 0;   //Variabel untuk menghitung panjang path yang sudah dibaca
-   isFilenameDone = FALSE;
-   
    //Traversal setiap folder di path 
    readSector(dirs, DIRS_SECTOR);
-   while (!isFilenameDone){
-      //Menyimpan nama folder saat ini di currpath
-      k = 0;
-      isDirnameDone = FALSE;
-      clear(currpath,15);
-      do{
-         if (path[j+k] == '/'){
-            isDirnameDone = TRUE;
-         }else if (path[j+k] == '\0'){
-            currpath[k] = path[j+k];
-            isDirnameDone = TRUE;
-            isFilenameDone = TRUE;
-         }else{  
-            currpath[k] = path[j+k];
-         }
-         k++;
-      }while(k < MAX_DIRNAME && !isDirnameDone);
-      j += k;
-      
-      //Traversal dirs untuk mencari folder currpath
-      if (!isFilenameDone){
-         i = 0;   //Variabel untuk traversal sektor dirs
-         while (i*DIRS_ENTRY_LENGTH < SECTOR_SIZE){
-            isEqual = isEqualPathName(currpath,dirs+i*DIRS_ENTRY_LENGTH+1);
-            if (isEqual && (dirs[i*DIRS_ENTRY_LENGTH] == parentIndex)){
-               parentIndex = i;
-               break;
-            }else{
-               i++;
-            }
-         }
-         //Folder currpath tidak ditemukan
-         if (i == MAX_DIRS){
-            *sectors = NOT_FOUND;
-            return;
-         }   
-      }
+   //Mengubah relative path menjadi path absolute dengan parent index yang sesuai
+   relPathToAbsPath(path, parentIndex, &success);
+
+   if (success != 0){
+      *sectors = success;
+      return;
    }
    
    //Traversal sector files untuk mencari apakah file currpath sudah ada
@@ -331,7 +319,7 @@ void writeFile(char *buffer, char *path, int *sectors, char parentIndex){
    readSector(files, FILES_SECTOR);
    fileIndex = 0;   //Variabel untuk index pada sector files
    while (fileIndex*DIRS_ENTRY_LENGTH < SECTOR_SIZE && files[fileIndex*DIRS_ENTRY_LENGTH+1] != '\0'){
-      isEqual = isEqualPathName(currpath,files+fileIndex*DIRS_ENTRY_LENGTH+1);
+      isEqual = isEqualPathName(path,files+fileIndex*DIRS_ENTRY_LENGTH+1);
       if (isEqual && files[fileIndex*DIRS_ENTRY_LENGTH] == parentIndex){
          *sectors = ALREADY_EXIST;
          return;
@@ -348,8 +336,8 @@ void writeFile(char *buffer, char *path, int *sectors, char parentIndex){
    clear(files+fileIndex*DIRS_ENTRY_LENGTH, DIRS_ENTRY_LENGTH);
    files[fileIndex*DIRS_ENTRY_LENGTH] = parentIndex;
    i = 0;
-   while (i < MAX_FILENAME && currpath[i] != '\0'){
-      files[fileIndex*DIRS_ENTRY_LENGTH+i+1] = currpath[i];
+   while (i < MAX_FILENAME && path[i] != '\0'){
+      files[fileIndex*DIRS_ENTRY_LENGTH+i+1] = path[i];
       i++;
    }
    
@@ -405,57 +393,23 @@ void terminateProgram (int *result) {
 
 void makeDirectory(char *path, int *result, char parentIndex){
    char dirs[SECTOR_SIZE];
-   char currpath[15];
-   int i,j,k,isEqual,isDirnameDone,isLastDirNameDone,sectorCount,dirIndex;
+   int i,isEqual,sectorCount,dirIndex,success;
    
-   j = 0;   //Variabel untuk menghitung panjang path yang sudah dibaca
-   isLastDirNameDone = FALSE;
-   
-   //Traversal setiap folder di path 
    readSector(dirs, DIRS_SECTOR);
-   while (!isLastDirNameDone){
-      //Menyimpan nama folder saat ini di currpath
-      k = 0;
-      isDirnameDone = FALSE;
-      do{
-         if (path[j+k] == '/'){
-            isDirnameDone = TRUE;
-         }else if (path[j+k] == '\0'){
-            currpath[k] = path[j+k];
-            isDirnameDone = TRUE;
-            isLastDirNameDone = TRUE;
-         }else{  
-            currpath[k] = path[j+k];
-         }
-         k++;
-      }while(k < MAX_DIRNAME && !isDirnameDone);
-      j += k;
-      
-      //Traversal dirs untuk mencari folder currpath
-      if (!isLastDirNameDone){
-         i = 0;   //Variabel untuk traversal sektor dirs
-         while (i*DIRS_ENTRY_LENGTH < SECTOR_SIZE){
-            isEqual = isEqualPathName(currpath,dirs+i*DIRS_ENTRY_LENGTH+1);
-            if (isEqual && dirs[i*DIRS_ENTRY_LENGTH] == parentIndex){
-               parentIndex = i;
-               break;
-            }else{
-               i++;
-            }
-         }
-         //Folder currpath tidak ditemukan
-         if (i == MAX_DIRS){
-            *result = NOT_FOUND;
-            return;
-         }   
-      }
+   //Mengubah relative path menjadi path absolute dengan parent index yang sesuai
+   relPathToAbsPath(path, &parentIndex, &success);
+   printString(path);
+   if (success != 0){
+      printString("--FailMakeDir");
+      *result = success;
+      return;
    }
    
    //Traversal sector dirs untuk mencari apakah dir currpath sudah ada
    //Jika belum, maka kembalikan index kosong pertama pada sektor dirs
    dirIndex = 0;   //Variabel untuk index pada sector dirs
    while (dirIndex*DIRS_ENTRY_LENGTH < SECTOR_SIZE && dirs[dirIndex*DIRS_ENTRY_LENGTH+1] != '\0'){
-      isEqual = isEqualPathName(currpath,dirs+dirIndex*DIRS_ENTRY_LENGTH+1);
+      isEqual = isEqualPathName(path,dirs+dirIndex*DIRS_ENTRY_LENGTH+1);
       if (isEqual && dirs[dirIndex*DIRS_ENTRY_LENGTH] == parentIndex){
          *result = ALREADY_EXIST;
          return;
@@ -472,11 +426,12 @@ void makeDirectory(char *path, int *result, char parentIndex){
    clear(dirs+dirIndex*DIRS_ENTRY_LENGTH, DIRS_ENTRY_LENGTH);
    dirs[dirIndex*DIRS_ENTRY_LENGTH] = parentIndex;
    i = 0;
-   while (i < MAX_DIRNAME && currpath[i] != '\0'){
-      dirs[dirIndex*DIRS_ENTRY_LENGTH+i+1] = currpath[i];
+   while (i < MAX_DIRNAME && path[i] != '\0'){
+      dirs[dirIndex*DIRS_ENTRY_LENGTH+i+1] = path[i];
       i++;
    }
    *result = 0;
+   printString("MakeDir");
    writeSector(dirs, DIRS_SECTOR);
 }
 
@@ -485,55 +440,24 @@ void deleteFile(char *path, int *result, char parentIndex){
    char files[SECTOR_SIZE];
    char sectors[SECTOR_SIZE];
    char map[SECTOR_SIZE];
-   char currpath[15];
-   int i,j,k,isEqual,isDirnameDone,isFilenameDone;
+   int i,j,k,isEqual,isDirnameDone,isFilenameDone,success;
    
    j = 0;   //Variabel untuk menghitung panjang path yang sudah dibaca
    isFilenameDone = FALSE;
    
    readSector(dirs, DIRS_SECTOR);
-   //Traversal setiap folder di path 
-   while (!isFilenameDone){
-      //Menyimpan nama folder saat ini di currpath
-      k = 0;
-      isDirnameDone = FALSE;
-      do{
-         if (path[j+k] == '/'){
-            isDirnameDone = TRUE;
-         }else if (path[j+k] == '\0'){
-            isDirnameDone = TRUE;
-            isFilenameDone = TRUE;
-         }else{  
-            currpath[k] = path[j+k];
-         }
-         k++;
-      }while(k < MAX_DIRNAME && !isDirnameDone);
-      j += k;
+   //Mengubah relative path menjadi path absolute dengan parent index yang sesuai
+   relPathToAbsPath(path, parentIndex, &success);
 
-      //Traversal dirs untuk mencari folder currpath
-      if (!isFilenameDone){
-         i = 0;   //Variabel untuk traversal sektor dirs
-         while (i*DIRS_ENTRY_LENGTH < SECTOR_SIZE){
-            isEqual = isEqualPathName(currpath,dirs+i*DIRS_ENTRY_LENGTH+1);
-            if (isEqual && dirs[i*DIRS_ENTRY_LENGTH] == parentIndex){
-               parentIndex = i;
-               break;
-            }else{
-               i++;
-            }
-         }
-         //Folder currpath tidak ditemukan
-         if (i == MAX_DIRS){
-            *result = NOT_FOUND;
-            return;
-         }   
-      }
+   if (success != 0){
+      *result = success;
+      return;
    }
    
    readSector(files, FILES_SECTOR);
    i = 0;   //Variabel untuk traversal sektor files
    while (i*DIRS_ENTRY_LENGTH < SECTOR_SIZE){
-      isEqual = isEqualPathName(currpath,files+i*DIRS_ENTRY_LENGTH+1);
+      isEqual = isEqualPathName(path,files+i*DIRS_ENTRY_LENGTH+1);
       if (isEqual && files[i*DIRS_ENTRY_LENGTH] == parentIndex){
          parentIndex = i;
          break; 
@@ -617,44 +541,11 @@ void deleteDirectory(char *path, int *success, char parentIndex){
    char currpath[15];
    int i,j,k,isEqual,isDirnameDone,isLastDirNameDone;
    
-   j = 0;   //Variabel untuk menghitung panjang path yang sudah dibaca
-   isLastDirNameDone = FALSE;
-   
-   readSector(dirs, DIRS_SECTOR);
-   //Traversal setiap folder di path 
-   while (!isLastDirNameDone){
-      //Menyimpan nama folder saat ini di currpath
-      k = 0;
-      isDirnameDone = FALSE;
-      do{
-         if (path[j+k] == '/'){
-            isDirnameDone = TRUE;
-         }else if (path[j+k] == '\0'){
-            isDirnameDone = TRUE;
-            isLastDirNameDone = TRUE;
-         }else{  
-            currpath[k] = path[j+k];
-         }
-         k++;
-      }while(k < MAX_DIRNAME && !isDirnameDone);
-      j += k;
+   //Mengubah relative path menjadi path absolute dengan parent index yang sesuai
+   relPathToAbsPath(path, parentIndex, success);
 
-      //Traversal dirs untuk mencari folder currpath
-      i = 0;   //Variabel untuk traversal sektor dirs
-      while (i*DIRS_ENTRY_LENGTH < SECTOR_SIZE){
-         isEqual = isEqualPathName(currpath,dirs+i*DIRS_ENTRY_LENGTH+1);
-         if (isEqual && dirs[i*DIRS_ENTRY_LENGTH] == parentIndex){
-            parentIndex = i;
-            break;
-         }else{
-            i++;
-         }
-      }
-      //Folder currpath tidak ditemukan
-      if (i == MAX_DIRS){
-         *success = NOT_FOUND;
-         return;
-      }   
+   if (success != 0){
+      return;
    }
 
    //Mengubah file name menjadi null
