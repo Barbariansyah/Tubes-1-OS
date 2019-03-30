@@ -45,13 +45,16 @@ void deleteDirectoryByParentId(char parentIndex);
 
 int main() {
    //interrupt(0x21, (AH << 8) | AL, BX, CX, DX);
-   //char readbuffer[SECTOR_SIZE];
-   //int sectors = 1;
+   char readbuffer[SECTOR_SIZE];
+   int sectors = 1;
    
    makeInterrupt21();
    //interrupt(0x21, 0x00, "Hi", 0, 0, 0);
    makeDirectory("home\0",0,0xFF);
    makeDirectory("home/bin\0",0,0xFF);
+   writeFile("ABCABC","file1",&sectors,0xFF);
+   // readFile(readbuffer,"file1",0,0xFF);
+   // printString(readbuffer);
    while (1);
 }
 
@@ -307,8 +310,7 @@ void writeFile(char *buffer, char *path, int *sectors, char parentIndex){
    //Traversal setiap folder di path 
    readSector(dirs, DIRS_SECTOR);
    //Mengubah relative path menjadi path absolute dengan parent index yang sesuai
-   relPathToAbsPath(path, parentIndex, &success);
-
+   relPathToAbsPath(path, &parentIndex, &success);
    if (success != 0){
       *sectors = success;
       return;
@@ -345,12 +347,14 @@ void writeFile(char *buffer, char *path, int *sectors, char parentIndex){
    readSector(filesect, SECTORS_SECTOR);
    for (i = 0, sectorCount = 0; i < SECTOR_SIZE && sectorCount < *sectors; ++i) {
       if (map[i] == EMPTY) {
+         printString("Write");
          map[i] = USED;
          filesect[fileIndex * DIRS_ENTRY_LENGTH + sectorCount] = i;
          clear(sectorBuffer, SECTOR_SIZE);
          for (j = 0; j < SECTOR_SIZE; ++j) {
             sectorBuffer[j] = buffer[sectorCount * SECTOR_SIZE + j];
          }
+         printString(sectorBuffer);
          writeSector(sectorBuffer, i);
          ++sectorCount;
       }
@@ -398,9 +402,7 @@ void makeDirectory(char *path, int *result, char parentIndex){
    readSector(dirs, DIRS_SECTOR);
    //Mengubah relative path menjadi path absolute dengan parent index yang sesuai
    relPathToAbsPath(path, &parentIndex, &success);
-   printString(path);
    if (success != 0){
-      printString("--FailMakeDir");
       *result = success;
       return;
    }
@@ -431,7 +433,6 @@ void makeDirectory(char *path, int *result, char parentIndex){
       i++;
    }
    *result = 0;
-   printString("MakeDir");
    writeSector(dirs, DIRS_SECTOR);
 }
 
