@@ -5,6 +5,7 @@
 #define MAX_DIRNAME 15
 #define MAX_FILENAME 15
 #define MAX_SECTORS 16
+#define MAX_PATH_LENGTH 255
 #define DIRS_ENTRY_LENGTH 16
 #define MAP_SECTOR 256
 #define DIRS_SECTOR 257
@@ -39,6 +40,7 @@ void getCurdir (char *curdir);
 void getArgc (char *argc);
 void getArgv (char index, char *argv);
 
+void clear(char *buffer, int length);
 int isEqualPathName(char *path1, char *path2);
 void deleteFileByParentId(char parentIndex);
 void deleteDirectoryByParentId(char parentIndex);
@@ -49,12 +51,17 @@ int main() {
    int sectors = 1;
    
    makeInterrupt21();
-   //interrupt(0x21, 0x00, "Hi", 0, 0, 0);
-   makeDirectory("home\0",0,0xFF);
-   makeDirectory("home/bin\0",0,0xFF);
-   writeFile("ABCABC","file1",&sectors,0xFF);
-   // readFile(readbuffer,"file1",0,0xFF);
-   // printString(readbuffer);
+   interrupt(0x21, 0x00, "ElPrimOS v0.2\r\n", 0, 0, 0);
+   // interrupt(0x21, 0x07, 0, 0, 0); 
+   makeDirectory("home",0,0xFF);
+   makeDirectory("bin",0,0xFF);
+   makeDirectory("home/wir",0,0xFF);
+   writeFile("ABCDD","home/wir/file1.txt",&sectors,0xFF);
+   readFile(readbuffer,"home/wir/file1.txt",0,0xFF);
+   printString(readbuffer);
+   deleteDirectory("home",0,0xFF);
+   clear(readbuffer,SECTOR_SIZE);
+   printString("Done");
    while (1);
 }
 
@@ -224,11 +231,9 @@ void relPathToAbsPath(char *path, char *parentIndex, int *success){
       }
    }
    //Menandakan success
-   clear(path,MAX_FILENAME);
    *success = 0;
    for(i = 0; i < MAX_FILENAME; i++){
       path[i] = currpath[i];
-      if (currpath[i] == '\0') break;
    }
 }
 
@@ -244,15 +249,24 @@ int isEqualPathName(char *path1, char *path2){
    return TRUE;
 }
 
+void copyString(char *dest, char *src, int len){
+   int i;
+   clear(dest,len);
+   for(i = 0; i < len; i++){
+      if (src[i] == '\0') break;
+      else dest[i] = src[i];
+   }
+}
+
 void readFile(char *buffer, char *path, int *result, char parentIndex){
    char dirs[SECTOR_SIZE];
    char files[SECTOR_SIZE];
    char sectors[SECTOR_SIZE];
    int i,isEqual,success;
-   
+
    readSector(dirs, DIRS_SECTOR);
    //Mengubah relative path menjadi path absolute dengan parent index yang sesuai
-   relPathToAbsPath(path, parentIndex, &success);
+   relPathToAbsPath(path, &parentIndex, &success);
 
    if (success != 0){
       *result = success;
@@ -292,8 +306,10 @@ void writeFile(char *buffer, char *path, int *sectors, char parentIndex){
    char files[SECTOR_SIZE];
    char filesect[SECTOR_SIZE];
    char sectorBuffer[SECTOR_SIZE];
+   char inpath[MAX_PATH_LENGTH];
    int i,j,k,isEqual,sectorCount,fileIndex,success;
-   
+
+   copyString(inpath,path,MAX_PATH_LENGTH);
    //Menentukan apakah sisa sector masih tersedia untuk menampung file baru
    readSector(map, MAP_SECTOR);
    for (i = 0, sectorCount = 0; i < SECTOR_SIZE && sectorCount < *sectors; ++i) {
@@ -310,7 +326,7 @@ void writeFile(char *buffer, char *path, int *sectors, char parentIndex){
    //Traversal setiap folder di path 
    readSector(dirs, DIRS_SECTOR);
    //Mengubah relative path menjadi path absolute dengan parent index yang sesuai
-   relPathToAbsPath(path, &parentIndex, &success);
+   relPathToAbsPath(inpath, &parentIndex, &success);
    if (success != 0){
       *sectors = success;
       return;
@@ -321,7 +337,7 @@ void writeFile(char *buffer, char *path, int *sectors, char parentIndex){
    readSector(files, FILES_SECTOR);
    fileIndex = 0;   //Variabel untuk index pada sector files
    while (fileIndex*DIRS_ENTRY_LENGTH < SECTOR_SIZE && files[fileIndex*DIRS_ENTRY_LENGTH+1] != '\0'){
-      isEqual = isEqualPathName(path,files+fileIndex*DIRS_ENTRY_LENGTH+1);
+      isEqual = isEqualPathName(inpath,files+fileIndex*DIRS_ENTRY_LENGTH+1);
       if (isEqual && files[fileIndex*DIRS_ENTRY_LENGTH] == parentIndex){
          *sectors = ALREADY_EXIST;
          return;
@@ -338,8 +354,8 @@ void writeFile(char *buffer, char *path, int *sectors, char parentIndex){
    clear(files+fileIndex*DIRS_ENTRY_LENGTH, DIRS_ENTRY_LENGTH);
    files[fileIndex*DIRS_ENTRY_LENGTH] = parentIndex;
    i = 0;
-   while (i < MAX_FILENAME && path[i] != '\0'){
-      files[fileIndex*DIRS_ENTRY_LENGTH+i+1] = path[i];
+   while (i < MAX_FILENAME && inpath[i] != '\0'){
+      files[fileIndex*DIRS_ENTRY_LENGTH+i+1] = inpath[i];
       i++;
    }
    
@@ -347,14 +363,12 @@ void writeFile(char *buffer, char *path, int *sectors, char parentIndex){
    readSector(filesect, SECTORS_SECTOR);
    for (i = 0, sectorCount = 0; i < SECTOR_SIZE && sectorCount < *sectors; ++i) {
       if (map[i] == EMPTY) {
-         printString("Write");
          map[i] = USED;
          filesect[fileIndex * DIRS_ENTRY_LENGTH + sectorCount] = i;
          clear(sectorBuffer, SECTOR_SIZE);
          for (j = 0; j < SECTOR_SIZE; ++j) {
             sectorBuffer[j] = buffer[sectorCount * SECTOR_SIZE + j];
          }
-         printString(sectorBuffer);
          writeSector(sectorBuffer, i);
          ++sectorCount;
       }
@@ -441,14 +455,17 @@ void deleteFile(char *path, int *result, char parentIndex){
    char files[SECTOR_SIZE];
    char sectors[SECTOR_SIZE];
    char map[SECTOR_SIZE];
+   char inpath[MAX_PATH_LENGTH];
    int i,j,k,isEqual,isDirnameDone,isFilenameDone,success;
+
+   copyString(inpath,path,MAX_PATH_LENGTH);
    
    j = 0;   //Variabel untuk menghitung panjang path yang sudah dibaca
    isFilenameDone = FALSE;
    
    readSector(dirs, DIRS_SECTOR);
    //Mengubah relative path menjadi path absolute dengan parent index yang sesuai
-   relPathToAbsPath(path, parentIndex, &success);
+   relPathToAbsPath(inpath, &parentIndex, &success);
 
    if (success != 0){
       *result = success;
@@ -458,7 +475,7 @@ void deleteFile(char *path, int *result, char parentIndex){
    readSector(files, FILES_SECTOR);
    i = 0;   //Variabel untuk traversal sektor files
    while (i*DIRS_ENTRY_LENGTH < SECTOR_SIZE){
-      isEqual = isEqualPathName(path,files+i*DIRS_ENTRY_LENGTH+1);
+      isEqual = isEqualPathName(inpath,files+i*DIRS_ENTRY_LENGTH+1);
       if (isEqual && files[i*DIRS_ENTRY_LENGTH] == parentIndex){
          parentIndex = i;
          break; 
@@ -484,6 +501,10 @@ void deleteFile(char *path, int *result, char parentIndex){
       map[sectors[i+parentIndex*MAX_SECTORS]] = '\0';
       i++;
    }while (i < MAX_SECTORS && sectors[i+parentIndex*MAX_SECTORS] != '\0');
+   
+   //Mengubah sectors menjadi null
+   clear(sectors+parentIndex*DIRS_ENTRY_LENGTH,DIRS_ENTRY_LENGTH);
+   
    *result = 0;
 
    writeSector(map,MAP_SECTOR);
@@ -500,7 +521,7 @@ void deleteDirectoryByParentId(char parentIndex){
    for (i = 0; i*DIRS_ENTRY_LENGTH<SECTOR_SIZE; i++){
       if (dirs[i*DIRS_ENTRY_LENGTH] == parentIndex){
          //Mengubah file name menjadi null
-         clear(dirs+parentIndex*DIRS_ENTRY_LENGTH,DIRS_ENTRY_LENGTH);
+         clear(dirs+i*DIRS_ENTRY_LENGTH,DIRS_ENTRY_LENGTH);
          writeSector(dirs,DIRS_SECTOR);
          deleteFileByParentId(i);
          deleteDirectoryByParentId(i);
@@ -521,14 +542,15 @@ void deleteFileByParentId(char parentIndex){
       if (files[i*DIRS_ENTRY_LENGTH] == parentIndex){
          //Mengubah file name menjadi null
          clear(files+i*DIRS_ENTRY_LENGTH,DIRS_ENTRY_LENGTH);
-         //Mengubah sector file ke-i menjadi null
-         clear(sectors+i*DIRS_ENTRY_LENGTH,DIRS_ENTRY_LENGTH);
          //Mengubah map sehingga sector yang digunakan file ke-i ditandai empty
          j = 0;
-         do{
-            map[sectors[i+parentIndex*MAX_SECTORS]] = '\0';
+         while (j < MAX_SECTORS && sectors[j+i*MAX_SECTORS] != '\0'){
+            map[sectors[j+i*MAX_SECTORS]] = '\0';
             j++;
-         }while (j < MAX_SECTORS && sectors[j+i*MAX_SECTORS] != '\0');
+         }
+         
+         //Mengubah sectors menjadi null
+         clear(sectors+i*DIRS_ENTRY_LENGTH,DIRS_ENTRY_LENGTH);
       }
    }
 
@@ -539,22 +561,38 @@ void deleteFileByParentId(char parentIndex){
 
 void deleteDirectory(char *path, int *success, char parentIndex){
    char dirs[SECTOR_SIZE];
-   char currpath[15];
    int i,j,k,isEqual,isDirnameDone,isLastDirNameDone;
    
    //Mengubah relative path menjadi path absolute dengan parent index yang sesuai
-   relPathToAbsPath(path, parentIndex, success);
-
+   relPathToAbsPath(path, &parentIndex, success);
+   readSector(dirs,DIRS_SECTOR);
    if (success != 0){
       return;
+   }else{
+      i = 0;   //Variabel untuk traversal sektor dirs
+      while (i*DIRS_ENTRY_LENGTH < SECTOR_SIZE){
+         isEqual = isEqualPathName(path,dirs+i*DIRS_ENTRY_LENGTH+1);
+         if (isEqual && dirs[i*DIRS_ENTRY_LENGTH] == parentIndex){
+            parentIndex = i;
+            break;
+         }else{
+            i++;
+         }
+      }
+      //Folder currpath tidak ditemukan
+      if (i == MAX_DIRS){
+         *success = NOT_FOUND;
+         return;
+      }
    }
 
-   //Mengubah file name menjadi null
-   clear(dirs+parentIndex*DIRS_ENTRY_LENGTH,DIRS_ENTRY_LENGTH);
-   writeSector(dirs, DIRS_SECTOR);
-
+   //Secara rekursif menghapus semua anak
    deleteFileByParentId(parentIndex);
    deleteDirectoryByParentId(parentIndex);
+
+   //Mengubah dir name menjadi null
+   clear(dirs+parentIndex*DIRS_ENTRY_LENGTH,DIRS_ENTRY_LENGTH);
+   writeSector(dirs, DIRS_SECTOR);
 }
 
 void putArgs (char curdir, char argc, char **argv) {
