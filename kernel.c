@@ -42,6 +42,7 @@ void getArgv (char index, char *argv);
 
 void clear(char *buffer, int length);
 int isEqualPathName(char *path1, char *path2);
+void relPathToAbsPath(char *path, char *parentIndex, int *success);
 void deleteFileByParentId(char parentIndex);
 void deleteDirectoryByParentId(char parentIndex);
 
@@ -519,7 +520,7 @@ void deleteDirectoryByParentId(char parentIndex){
 
    readSector(dirs,DIRS_SECTOR);
    for (i = 0; i*DIRS_ENTRY_LENGTH<SECTOR_SIZE; i++){
-      if (dirs[i*DIRS_ENTRY_LENGTH] == parentIndex){
+      if (dirs[i*DIRS_ENTRY_LENGTH] == parentIndex && dirs[i*DIRS_ENTRY_LENGTH+1] != '\0'){
          //Mengubah file name menjadi null
          clear(dirs+i*DIRS_ENTRY_LENGTH,DIRS_ENTRY_LENGTH);
          writeSector(dirs,DIRS_SECTOR);
@@ -586,13 +587,13 @@ void deleteDirectory(char *path, int *success, char parentIndex){
       }
    }
 
-   //Secara rekursif menghapus semua anak
-   deleteFileByParentId(parentIndex);
-   deleteDirectoryByParentId(parentIndex);
-
    //Mengubah dir name menjadi null
    clear(dirs+parentIndex*DIRS_ENTRY_LENGTH,DIRS_ENTRY_LENGTH);
    writeSector(dirs, DIRS_SECTOR);
+
+   //Secara rekursif menghapus semua anak
+   deleteFileByParentId(parentIndex);
+   deleteDirectoryByParentId(parentIndex);
 }
 
 void putArgs (char curdir, char argc, char **argv) {
