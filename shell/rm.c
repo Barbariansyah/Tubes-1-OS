@@ -1,4 +1,23 @@
 #include "kernel.c"
+#define SECTOR_SIZE 512
+#define DIRS_SECTOR 257
+#define FILES_SECTOR 258
+#define DIRS_ENTRY_LENGTH 16
+#define MAX_DIRNAME 15
+#define MAX_DIRS 32
+#define MAX_FILES 32
+
+int isEqualPathName(char *path1, char *path2){
+   int i;
+   for(i = 0; i < MAX_DIRNAME; i++){
+      if (path1[i] != path2[i]){
+         return FALSE;
+      }else if(path1[i]=='\0' && path2[i]=='\0' && i!=0){
+         return TRUE;
+      }
+   }
+   return TRUE;
+}
 
 void main(){
   char argv[512];
@@ -11,7 +30,7 @@ void main(){
   i = 0;
   j = 0;
   isEqual = 0;
-  
+
   interrupt(0x21,0x02, dirs, DIRS_SECTOR, 0);
   interrupt(0x21,0x02, files, FILES_SECTOR, 0);
   interrupt(0x21,0x21, parentIndex, 0, 0);

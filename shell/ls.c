@@ -1,4 +1,8 @@
 #include "kernel.c"
+#define SECTOR_SIZE 512
+#define DIRS_SECTOR 257
+#define FILES_SECTOR 258
+#define DIRS_ENTRY_LENGTH 16
 
 void main(){
   char name[512];
