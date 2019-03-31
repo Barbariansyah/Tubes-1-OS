@@ -23,12 +23,13 @@
 
 void changeCurDir(char *path, char *curdir, char parentIndex);
 void splitCommand(char *command, char **commandList, char *num_command);
-void strCopy(char *str1, char *str2);
+void strCopy(char *str1, char *str2, int i);
 void relPathToAbsPath(char *dir, char *parentIndex, int *success);
 void clear(char *buffer, int length);
 
 int main() {
 	char command[MAX_COMMAND];
+	char prog[MAX_FILENAME];
 	char commandList[16][MAX_FILENAME];
 	char path[512];
 	char curdir;
@@ -47,7 +48,7 @@ int main() {
 		splitCommand(command, commandList, &num_command); 
 		
 		if(strCmp(commandList[0], "cd", 2)) {
-			strCopy(commandList[1], path);
+			strCopy(commandList[1], path, 0);
 			parentIdx = curdir;
 			// mengecek apakah directory sudah benar dan path sekarang berisi nama directory terakhir yang jika ditemukan
 			relPathToAbsPath(path, &parentIdx, &found);
@@ -59,24 +60,26 @@ int main() {
 			}
 		}
 		else if (strCmp(commandList[0], "./", 2)) {
-			argc = num_command - 2;
-			for(i = 2; i < num_command; i++) {
-				j = i - 2;
-				strCopy(commandList[i], argv[j]);
+			argc = num_command - 1;
+			for(i = 1; i < num_command; i++) {
+				j = i - 1;
+				strCopy(commandList[i], argv[j], 0);
 			}
 			
+			strCopy(commandList[0], prog, 2);
 			interrupt(0x21, 0x20, curdir, argc, argv);	
-			interrupt(0x21, 0x06, commandList[1], 0x21000, &result, curdir);
+			interrupt(0x21, 0x06, prog, 0x21000, &result, curdir);
 		}
 		else {
-			argc = num_command - 2;
-			for(i = 2; i < num_command; i++) {
-				j = i - 2;
-				strCopy(commandList[i], argv[j]);
+			argc = num_command - 1;
+			for(i = 1; i < num_command; i++) {
+				j = i - 1;
+				strCopy(commandList[i], argv[j] , 0);
 			}
 			
+			strCopy(commandList[0], prog, 2);
 			interrupt(0x21, 0x20, curdir, argc, argv);
-			interrupt(0x21, 0x06, commandList[1], 0x21000, &result, 0xFF);
+			interrupt(0x21, 0x06, prog, 0x21000, &result, 0xFF);
 		}
 		
 		if(!result) {
@@ -101,10 +104,13 @@ int strCmp(char *str1, char *str2, int size) {
 }
 
 // Fungsi untuk copy string
-void strCopy(char *str1, char *str2) {
-	int i = 0;
+void strCopy(char *str1, char *str2, int i) {
+	int j = i;
+	int k;
 	while(str1[i] != '\0') {
-		str2[i] = str1[i];
+		k = i - j;
+		str2[k] = str1[i];
+		i++;
 	}
 }
 
