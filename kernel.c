@@ -53,16 +53,8 @@ int main() {
    
    makeInterrupt21();
    interrupt(0x21, 0x00, "ElPrimOS v0.2\r\n", 0, 0, 0);
-   // interrupt(0x21, 0x07, 0, 0, 0); 
-   makeDirectory("home",0,0xFF);
-   makeDirectory("bin",0,0xFF);
-   makeDirectory("home/wir",0,0xFF);
-   writeFile("ABCDD","home/wir/file1.txt",&sectors,0xFF);
-   readFile(readbuffer,"home/wir/file1.txt",0,0xFF);
-   printString(readbuffer);
-   deleteDirectory("home",0,0xFF);
-   clear(readbuffer,SECTOR_SIZE);
-   printString("Done");
+   writeFile("ABC","text1.txt",&sectors,0xFF);
+   interrupt(0x21, 0x07, 0, 0, 0); 
    while (1);
 }
 
@@ -137,9 +129,9 @@ void readString(char *string){
          string[i] = c;
          i++;
          interrupt(0x10, 0xE00 + '\n', 0, 0, 0);
-      }else if (c == '\b'){
+      }else if (c == '\b' && i>0){
          string[i] = '\0';
-         if (i>0) i--;
+         i--;
          interrupt(0x10, 0xE00 + '\b', 0, 0, 0);
          interrupt(0x10, 0xE00 + '\0', 0, 0, 0);
          interrupt(0x10, 0xE00 + '\b', 0, 0, 0);
@@ -385,9 +377,8 @@ void executeProgram(char *path, int segment, int *result, char parentIndex){
    char buffer[MAX_SECTORS*SECTOR_SIZE];
    int successRead;
    int i;
-   
    readFile(buffer, path, &successRead, parentIndex);
-   if (successRead){
+   if (successRead == 0){
       for(i = 0; i < MAX_SECTORS*SECTOR_SIZE; i++){
          putInMemory(segment,i,buffer[i]);
       }

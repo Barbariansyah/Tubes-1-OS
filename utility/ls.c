@@ -1,4 +1,3 @@
-#include "kernel.c"
 #define SECTOR_SIZE 512
 #define DIRS_SECTOR 257
 #define FILES_SECTOR 258
@@ -13,11 +12,11 @@ void main(){
 
   interrupt(0x21,0x02, dirs, DIRS_SECTOR, 0);
   interrupt(0x21,0x02, files, FILES_SECTOR, 0);
-  interrupt(0x21,0x21, parentIndex, 0, 0);
+  interrupt(0x21,0x21, &parentIndex, 0, 0);
 
   i = 0;
   while(i*DIRS_ENTRY_LENGTH < SECTOR_SIZE){
-    if(dirs[i*DIRS_ENTRY_LENGTH] == parentIndex){
+    if(dirs[i*DIRS_ENTRY_LENGTH] == parentIndex && dirs[i*DIRS_ENTRY_LENGTH+1] != '\0'){
       interrupt(0x21, 0x00, dirs+i*DIRS_ENTRY_LENGTH+1, 0, 0);
       interrupt(0x21, 0x00, "\n\r", 0 , 0);
     }
@@ -26,11 +25,12 @@ void main(){
 
   i = 0;
   while(i*DIRS_ENTRY_LENGTH < SECTOR_SIZE){
-    if(files[i*DIRS_ENTRY_LENGTH] == parentIndex){
+    if(files[i*DIRS_ENTRY_LENGTH] == parentIndex && files[i*DIRS_ENTRY_LENGTH+1] != '\0'){
       interrupt(0x21, 0x00, files+i*DIRS_ENTRY_LENGTH+1, 0, 0);
       interrupt(0x21, 0x00, "\n\r", 0 , 0);
     }
     i++;
   }
 
+  interrupt(0x21, 0x07, 0, 0, 0);
 }

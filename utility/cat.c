@@ -1,4 +1,3 @@
-#include "kernel.c"
 #define SECTOR_SIZE 512
 #define DIRS_SECTOR 257
 #define FILES_SECTOR 258
@@ -6,6 +5,8 @@
 #define MAX_DIRNAME 15
 #define MAX_DIRS 32
 #define MAX_FILES 32
+#define FALSE 0
+#define TRUE 1
 
 int isEqualPathName(char *path1, char *path2){
    int i;
@@ -19,7 +20,7 @@ int isEqualPathName(char *path1, char *path2){
    return TRUE;
 }
 
-void main(){
+int main(){
   char argv[512];
   char dirs[SECTOR_SIZE];
   char files[SECTOR_SIZE];
@@ -30,27 +31,28 @@ void main(){
   i = 0;
   j = 0;
   isEqual = 0;
-
+  interrupt(0x21, 0x00, "Cat", 0, 0);
   interrupt(0x21,0x02, dirs, DIRS_SECTOR, 0);
   interrupt(0x21,0x02, files, FILES_SECTOR, 0);
-  interrupt(0x21,0x21, parentIndex, 0, 0);
+  interrupt(0x21,0x21, &parentIndex, 0, 0);
   interrupt(0x21, 0x23, 0, argv, 0);
+  interrupt(0x21, 0x00, argv, 0, 0);
 
 
-    while(j*DIRS_ENTRY_LENGTH < SECTOR_SIZE){
-      isEqual = isEqualPathName(argv, dirs + j*DIRS_ENTRY_LENGTH +1);
+  while(j*DIRS_ENTRY_LENGTH < SECTOR_SIZE){
+    isEqual = isEqualPathName(argv, dirs + j*DIRS_ENTRY_LENGTH +1);
 
-      if (isEqual && dirs[j*DIRS_ENTRY_LENGTH] == parentIndex){
-        interrupt(0x21, 0x00, "cat: ", 0, 0);
-        interrupt(0x21, 0x00, argv, 0, 0);
-        interrupt(0x21, 0x00, ": Is a directory", 0, 0);
-        interrupt(0x21, 0x00, "\n\r", 0, 0);
-        return;
-      }
-      else{
-           j++;
-      }
+    if (isEqual && dirs[j*DIRS_ENTRY_LENGTH] == parentIndex){
+      interrupt(0x21, 0x00, "cat: ", 0, 0);
+      interrupt(0x21, 0x00, argv, 0, 0);
+      interrupt(0x21, 0x00, ": Is a directory", 0, 0);
+      interrupt(0x21, 0x00, "\n\r", 0, 0);
+      return;
     }
+    else{
+          j++;
+    }
+  }
 
   while(i*DIRS_ENTRY_LENGTH < SECTOR_SIZE){
     isEqual = isEqualPathName(argv, files + i*DIRS_ENTRY_LENGTH +1);

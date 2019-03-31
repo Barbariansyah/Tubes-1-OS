@@ -22,7 +22,7 @@
 #define USED 0xFF
 
 void changeCurDir(char *path, char *curdir, char parentIndex);
-void splitCommand(char *command, char **commandList, char *num_command);
+void splitCommand(char *command, char commandList[16][16], int *num_command);
 void strCopy(char *str1, char *str2, int i);
 void relPathToAbsPath(char *dir, char *parentIndex, int *success);
 void clear(char *buffer, int length);
@@ -30,11 +30,11 @@ void clear(char *buffer, int length);
 int main() {
 	char command[MAX_COMMAND];
 	char prog[MAX_FILENAME];
-	char commandList[16][MAX_FILENAME];
+	char commandList[16][16];
 	char path[512];
 	char curdir;
 	char argc;
-	char *argv[MAX_BYTE];
+	char *argv[16];
 	char parentIdx;
 	int result;
 	int found;
@@ -43,7 +43,16 @@ int main() {
 	
 	curdir = 0xFF;
 	while(1) {
-		interrupt(0x21, 0x0, "3===D ", 0, 0);
+		interrupt(0x21, 0x0, "$ ", 0, 0);
+
+		for(i = 0; i < 16; i++) {
+			clear(argv[j], 16);
+		}
+		interrupt(0x21, 0x20, curdir, argc, argv);
+		clear(command,MAX_COMMAND);
+		clear(commandList,16*16);
+		clear(path,512);
+
 		interrupt(0x21, 0x1, command, 0, 0);
 		splitCommand(command, commandList, &num_command); 
 		
@@ -52,38 +61,41 @@ int main() {
 			parentIdx = curdir;
 			// mengecek apakah directory sudah benar dan path sekarang berisi nama directory terakhir yang jika ditemukan
 			relPathToAbsPath(path, &parentIdx, &found);
-			if(found) {
+			if(found == 0) {
 				changeCurDir(path, &curdir, parentIdx);
+				result = 1;
 			}
 			else {
-				interrupt(0x21, 0x0, "Directory not found \n");
+				interrupt(0x21, 0x0, "Directory not found \n", 0, 0);
+				result = 0;
 			}
 		}
 		else if (strCmp(commandList[0], "./", 2)) {
-			argc = num_command - 1;
+			strCopy(commandList[0], path, 2);
+			argc = num_command;
 			for(i = 1; i < num_command; i++) {
 				j = i - 1;
 				strCopy(commandList[i], argv[j], 0);
 			}
-			
-			strCopy(commandList[0], prog, 2);
-			interrupt(0x21, 0x20, curdir, argc, argv);	
-			interrupt(0x21, 0x06, prog, 0x21000, &result, curdir);
+			interrupt(0x21, 0x20, curdir, argc, argv);
+			interrupt(0x21, (curdir << 8) | 0x06, path, 0x2001, &result);
 		}
 		else {
-			argc = num_command - 1;
+			argc = num_command-1;
 			for(i = 1; i < num_command; i++) {
 				j = i - 1;
-				strCopy(commandList[i], argv[j] , 0);
+				strCopy(commandList[i], argv[j], 0);
 			}
-			
-			strCopy(commandList[0], prog, 2);
+			path[0] = '0';
+			path[1] = '3';
+			path[2] = '\0';
+			argv[0] = path;
 			interrupt(0x21, 0x20, curdir, argc, argv);
-			interrupt(0x21, 0x06, prog, 0x21000, &result, 0xFF);
+			interrupt(0x21, (0xFF << 8) | 0x06, commandList[0], 0x2001, &result);
 		}
 		
 		if(!result) {
-			interrupt(0x21, 0x0, "Command is invalid \n");
+			interrupt(0x21, 0x0, "Command is invalid \n\r",0,0);
 		}
 	}
 }
@@ -115,21 +127,28 @@ void strCopy(char *str1, char *str2, int i) {
 }
 
 // Fungsi untuk memecah command menjadi beberapa command inputan user dan menghasilkan jumlah command
-void splitCommand(char *command, char **commandList, char *num_command) {
-	int i = 0;
+void splitCommand(char *command, char commandList[16][16], int *num_command) {
+	int i;
+	int len;
 	int j;
+
+	i = 0;
+	len = 0;
+	j = 0;
 	
-	while(command[i] != '\0') {
-		j = 0;
-		while(command[j] != ' ') {
-			commandList[i][j] = command[j];
+	while(command[len] != '\0') {
+		if (command[len] == ' '){
+			commandList[i][j] = '\0';
+			j = 0;
+			i++;
+		}else{
+			commandList[i][j] = command[len];
 			j++;
 		}
-		
-		i++;
+		len++;
 	}
-	
-	num_command = i;
+
+	*num_command = i+1;
 }
 		
 void changeCurDir(char *path, char *curdir, char parentIndex) {
@@ -138,7 +157,7 @@ void changeCurDir(char *path, char *curdir, char parentIndex) {
 	int isEqual;
 	char dirs[SECTOR_SIZE];
 	
-	intterupt(0x21, 0x02, dirs, DIRS_SECTOR, 0);
+	interrupt(0x21, 0x02, dirs, DIRS_SECTOR, 0);
 	
 	while (i*DIRS_ENTRY_LENGTH < SECTOR_SIZE) {
 		isEqual = strCmp(path,dirs+i*DIRS_ENTRY_LENGTH+1, MAX_DIRNAME);
@@ -159,7 +178,7 @@ void relPathToAbsPath(char *dir, char *parentIndex, int *success) {
    j = 0;   //Variabel untuk menghitung panjang path yang sudah dibaca
    isLastPathDone = FALSE;
    
-   intterupt(0x21, 0x02, dirs, DIRS_SECTOR, 0);
+   interrupt(0x21, 0x02, dirs, DIRS_SECTOR, 0);
    //Traversal setiap folder di path 
    while (!isLastPathDone){
       //Menyimpan nama folder saat ini di currpath
