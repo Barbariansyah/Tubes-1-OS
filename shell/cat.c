@@ -36,11 +36,27 @@ void main(){
   interrupt(0x21,0x21, parentIndex, 0, 0);
   interrupt(0x21, 0x23, 0, argv, 0);
 
+
+    while(j*DIRS_ENTRY_LENGTH < SECTOR_SIZE){
+      isEqual = isEqualPathName(argv, dirs + j*DIRS_ENTRY_LENGTH +1);
+
+      if (isEqual && dirs[j*DIRS_ENTRY_LENGTH] == parentIndex){
+        interrupt(0x21, 0x00, "cat: ", 0, 0);
+        interrupt(0x21, 0x00, argv, 0, 0);
+        interrupt(0x21, 0x00, ": Is a directory", 0, 0);
+        interrupt(0x21, 0x00, "\n\r", 0, 0);
+        return;
+      }
+      else{
+           j++;
+      }
+    }
+
   while(i*DIRS_ENTRY_LENGTH < SECTOR_SIZE){
     isEqual = isEqualPathName(argv, files + i*DIRS_ENTRY_LENGTH +1);
 
     if (isEqual && files[i*DIRS_ENTRY_LENGTH] == parentIndex){
-         interrupt(0x21, 0x09, argv, 0, parentIndex);
+         interrupt(0x21, 0x06, parentIndex, 0, 0);
          break;
     }
     else{
@@ -48,25 +64,12 @@ void main(){
     }
   }
 
-  while(j*DIRS_ENTRY_LENGTH < SECTOR_SIZE){
-    isEqual = isEqualPathName(argv, dirs + j*DIRS_ENTRY_LENGTH +1);
-
-    if (isEqual && dirs[j*DIRS_ENTRY_LENGTH] == parentIndex){
-         interrupt(0x21, 0x0A, argv, 0, parentIndex);
-         break;
-    }
-    else{
-         j++;
-    }
-  }
-
   if (i == MAX_FILES && j == MAX_DIRS){
-      interrupt(0x21, 0x00, "rm: cannot remove \'", 0, 0);
+      interrupt(0x21, 0x00, "cat: ", 0, 0);
       interrupt(0x21, 0x00, argv, 0, 0);
-      interrupt(0x21, 0x00, "\': No such file or directory", 0, 0);
+      interrupt(0x21, 0x00, ": No such file or directory", 0, 0);
       interrupt(0x21, 0x00, "\n\r", 0, 0);
       return;
   }
-
 
 }
