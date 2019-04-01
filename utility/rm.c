@@ -8,6 +8,8 @@
 #define FALSE 0
 #define TRUE 1
 
+void copyString(char *dest, char *src, int len);
+
 void main(){
   char argv[SECTOR_SIZE];
   char parentIndex;
@@ -17,7 +19,7 @@ void main(){
   int resultFile;
 
   interrupt(0x21, 0x21, &parentIndex, 0, 0);
-  interrupt(0x21, 0x22, argv, 0, 0);
+  interrupt(0x21, 0x23, 0, argv, 0);
   copyString(fileName,argv,SECTOR_SIZE);
   copyString(dirName,argv,SECTOR_SIZE);
 
@@ -30,5 +32,21 @@ void main(){
     interrupt(0x21, 0x00, "\': No such file or directory", 0, 0);
     interrupt(0x21, 0x00, "\n\r", 0, 0);
   }
+  interrupt(0x21, 0x07, 0, 0, 0);
+}
 
+void clear(char *buffer, int length) {
+   int i;
+   for(i = 0; i < length; ++i) {
+      buffer[i] = '\0';
+   }
+}
+
+void copyString(char *dest, char *src, int len){
+   int i;
+   clear(dest,len);
+   for(i = 0; i < len; i++){
+      if (src[i] == '-') break;
+      else dest[i] = src[i];
+   }
 }

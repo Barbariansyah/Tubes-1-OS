@@ -449,14 +449,9 @@ void deleteFile(char *path, int *result, char parentIndex){
    int i,j,k,isEqual,isDirnameDone,isFilenameDone,success;
 
    copyString(inpath,path,MAX_PATH_LENGTH);
-   
-   j = 0;   //Variabel untuk menghitung panjang path yang sudah dibaca
-   isFilenameDone = FALSE;
-   
    readSector(dirs, DIRS_SECTOR);
    //Mengubah relative path menjadi path absolute dengan parent index yang sesuai
    relPathToAbsPath(inpath, &parentIndex, &success);
-
    if (success != 0){
       *result = success;
       return;
@@ -551,17 +546,19 @@ void deleteFileByParentId(char parentIndex){
 
 void deleteDirectory(char *path, int *success, char parentIndex){
    char dirs[SECTOR_SIZE];
+   char inpath[SECTOR_SIZE];
    int i,j,k,isEqual,isDirnameDone,isLastDirNameDone;
    
    //Mengubah relative path menjadi path absolute dengan parent index yang sesuai
-   relPathToAbsPath(path, &parentIndex, success);
+   copyString(inpath,path,SECTOR_SIZE);
+   relPathToAbsPath(inpath, &parentIndex, success);
    readSector(dirs,DIRS_SECTOR);
-   if (success != 0){
+   if (*success != 0){
       return;
    }else{
       i = 0;   //Variabel untuk traversal sektor dirs
       while (i*DIRS_ENTRY_LENGTH < SECTOR_SIZE){
-         isEqual = isEqualPathName(path,dirs+i*DIRS_ENTRY_LENGTH+1);
+         isEqual = isEqualPathName(inpath,dirs+i*DIRS_ENTRY_LENGTH+1);
          if (isEqual && dirs[i*DIRS_ENTRY_LENGTH] == parentIndex){
             parentIndex = i;
             break;

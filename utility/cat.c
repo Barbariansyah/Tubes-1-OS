@@ -30,7 +30,10 @@ void main(){
     //Read file
     interrupt(0x21, (parentIndex << 8) | 0x04, readbuffer, argv[0], &result);
     if (result != 0){
-      interrupt(0x21, 0x0, "Failed to read file\n\r", 0, 0);
+      interrupt(0x21, 0x00, "cat: \'", 0, 0);
+      interrupt(0x21, 0x00, filename, 0, 0);
+      interrupt(0x21, 0x00, "\': No such file or directory", 0, 0);
+      interrupt(0x21, 0x00, "\n\r", 0, 0);
     }else{
       interrupt(0x21, 0x0, readbuffer, 0, 0);
       interrupt(0x21, 0x0, "\n\r", 0, 0);
@@ -42,9 +45,19 @@ void main(){
     interrupt(0x21, 0x1, readbuffer, 0, 0);
     interrupt(0x21, (parentIndex << 8) | 0x09, filename, 0, 0);
     interrupt(0x21, (parentIndex << 8) | 0x05, readbuffer, filename, &result);
-    if (result <= 0){
-      interrupt(0x21, 0x0, "Failed to write file\n\r", 0, 0);
-    }else{
+    if (result == 0){
+      interrupt(0x21, 0x00, "cat: \'", 0, 0);
+      interrupt(0x21, 0x00, filename, 0, 0);
+      interrupt(0x21, 0x00, "\': No such file or directory", 0, 0);
+      interrupt(0x21, 0x00, "\n\r", 0, 0);
+    }
+    else if (result <0 ){
+      interrupt(0x21, 0x00, "cat: \'", 0, 0);
+      interrupt(0x21, 0x00, filename, 0, 0);
+      interrupt(0x21, 0x00, "\': Error", 0, 0);
+      interrupt(0x21, 0x00, "\n\r", 0, 0);
+    }
+    else{
       interrupt(0x21, 0x0, "Success write file\n\r", 0, 0);
     }
   }

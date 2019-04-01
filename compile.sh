@@ -30,5 +30,5 @@ ld86 -o rm -d rm.o lib_asm.o
 ./loadFile ls
 ./loadFile cat
 ./loadFile mkdir
-#./loadFile rm
+./loadFile rm
 
