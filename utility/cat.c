@@ -37,7 +37,7 @@ void main(){
     }
   }else if (argc == 2 && argv[1][1] == 'w'){
     //Write file
-    result = 16;
+    result = 1;
     interrupt(0x21, 0x0, "Enter your text:", 0, 0);
     interrupt(0x21, 0x1, readbuffer, 0, 0);
     interrupt(0x21, (parentIndex << 8) | 0x09, filename, 0, 0);
