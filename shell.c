@@ -31,15 +31,18 @@ int main() {
 	char command[MAX_COMMAND];
 	char prog[MAX_FILENAME];
 	char commandList[16][16];
-	char path[512];
+	char path[MAX_COMMAND];
+	char temp[MAX_COMMAND];
 	char curdir;
 	char argc;
 	char *argv[16];
+	char readbuffer[SECTOR_SIZE*MAX_SECTORS];
 	char parentIdx;
 	int result;
 	int found;
 	int num_command;
 	int i,j;
+	int sectors = 1;
 	
 	curdir = 0xFF;
 	while(1) {
@@ -71,11 +74,13 @@ int main() {
 			}
 		}
 		else if (strCmp(commandList[0], "./", 2)) {
+			// interrupt(0x21,(0xFF << 8) | 0x05,"uGkza4wj","K301/in/code.txt",&sectors);
+			// interrupt(0x21,(0xFF << 8) | 0x05,"uGkza4wj","in",&sectors);
 			strCopy(commandList[0], path, 2);
 			argc = num_command;
 			for(i = 1; i < num_command; i++) {
 				j = i - 1;
-				strCopy(commandList[i], argv[j], 0);
+				argv[j] = commandList[i];
 			}
 			interrupt(0x21, 0x20, curdir, argc, argv);
 			interrupt(0x21, (curdir << 8) | 0x06, path, 0x2001, &result);
@@ -84,14 +89,10 @@ int main() {
 			argc = num_command-1;
 			for(i = 1; i < num_command; i++) {
 				j = i - 1;
-				strCopy(commandList[i], argv[j], 0);
+				argv[j] = commandList[i];
 			}
-			path[0] = '0';
-			path[1] = '3';
-			path[2] = '\0';
-			argv[0] = path;
 			interrupt(0x21, 0x20, curdir, argc, argv);
-			interrupt(0x21, (0xFF << 8) | 0x06, commandList[0], 0x2001, &result);
+			interrupt(0x21, (0xFF << 8) | 0x06, commandList[0], 0x2000, &result);
 		}
 		
 		if(!result) {

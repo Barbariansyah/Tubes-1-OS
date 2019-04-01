@@ -18,11 +18,17 @@ bcc -ansi -c -o ls.o utility/ls.c
 ld86 -o ls -d ls.o lib_asm.o
 bcc -ansi -c -o cat.o utility/cat.c
 ld86 -o cat -d cat.o lib_asm.o
+bcc -ansi -c -o mkdir.o utility/mkdir.c
+ld86 -o mkdir -d mkdir.o lib_asm.o
+bcc -ansi -c -o rm.o utility/rm.c
+ld86 -o rm -d rm.o lib_asm.o
 
+
+./loadFile keyproc2
 ./loadFile shell
 ./loadFile echo
 ./loadFile ls
 ./loadFile cat
-./loadFile keyproc2
-
+./loadFile mkdir
+#./loadFile rm
 

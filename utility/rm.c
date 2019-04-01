@@ -1,4 +1,3 @@
-#include "kernel.c"
 #define SECTOR_SIZE 512
 #define DIRS_SECTOR 257
 #define FILES_SECTOR 258
@@ -6,6 +5,8 @@
 #define MAX_DIRNAME 15
 #define MAX_DIRS 32
 #define MAX_FILES 32
+#define FALSE 0
+#define TRUE 1
 
 int isEqualPathName(char *path1, char *path2){
    int i;
@@ -67,6 +68,5 @@ void main(){
       interrupt(0x21, 0x00, "\n\r", 0, 0);
       return;
   }
-
-
+  interrupt(0x21, 0x07, 0, 0, 0);
 }

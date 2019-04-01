@@ -53,7 +53,6 @@ int main() {
    
    makeInterrupt21();
    interrupt(0x21, 0x00, "ElPrimOS v0.2\r\n", 0, 0, 0);
-   writeFile("ABC","text1.txt",&sectors,0xFF);
    interrupt(0x21, 0x07, 0, 0, 0); 
    while (1);
 }
@@ -252,14 +251,14 @@ void copyString(char *dest, char *src, int len){
 }
 
 void readFile(char *buffer, char *path, int *result, char parentIndex){
-   char dirs[SECTOR_SIZE];
    char files[SECTOR_SIZE];
    char sectors[SECTOR_SIZE];
+   char temppath[SECTOR_SIZE];
    int i,isEqual,success;
 
-   readSector(dirs, DIRS_SECTOR);
    //Mengubah relative path menjadi path absolute dengan parent index yang sesuai
-   relPathToAbsPath(path, &parentIndex, &success);
+   copyString(temppath,path,SECTOR_SIZE);
+   relPathToAbsPath(temppath, &parentIndex, &success);
 
    if (success != 0){
       *result = success;
@@ -269,7 +268,7 @@ void readFile(char *buffer, char *path, int *result, char parentIndex){
    readSector(files, FILES_SECTOR);
    i = 0;   //Variabel untuk traversal sektor files
    while (i*DIRS_ENTRY_LENGTH < SECTOR_SIZE){
-      isEqual = isEqualPathName(path,files+i*DIRS_ENTRY_LENGTH+1);
+      isEqual = isEqualPathName(temppath,files+i*DIRS_ENTRY_LENGTH+1);
       if (isEqual && files[i*DIRS_ENTRY_LENGTH] == parentIndex){
          parentIndex = i;
          break; 
@@ -316,8 +315,6 @@ void writeFile(char *buffer, char *path, int *sectors, char parentIndex){
       return;
    }
    
-   //Traversal setiap folder di path 
-   readSector(dirs, DIRS_SECTOR);
    //Mengubah relative path menjadi path absolute dengan parent index yang sesuai
    relPathToAbsPath(inpath, &parentIndex, &success);
    if (success != 0){
@@ -368,7 +365,6 @@ void writeFile(char *buffer, char *path, int *sectors, char parentIndex){
    }
    
    writeSector(map, MAP_SECTOR);
-   writeSector(dirs, DIRS_SECTOR);
    writeSector(files, FILES_SECTOR);
    writeSector(filesect, SECTORS_SECTOR);
 }
@@ -403,11 +399,13 @@ void terminateProgram (int *result) {
 
 void makeDirectory(char *path, int *result, char parentIndex){
    char dirs[SECTOR_SIZE];
+   char inpath[SECTOR_SIZE];
    int i,isEqual,sectorCount,dirIndex,success;
    
+   copyString(inpath,path,SECTOR_SIZE);
    readSector(dirs, DIRS_SECTOR);
    //Mengubah relative path menjadi path absolute dengan parent index yang sesuai
-   relPathToAbsPath(path, &parentIndex, &success);
+   relPathToAbsPath(inpath, &parentIndex, &success);
    if (success != 0){
       *result = success;
       return;
@@ -417,7 +415,7 @@ void makeDirectory(char *path, int *result, char parentIndex){
    //Jika belum, maka kembalikan index kosong pertama pada sektor dirs
    dirIndex = 0;   //Variabel untuk index pada sector dirs
    while (dirIndex*DIRS_ENTRY_LENGTH < SECTOR_SIZE && dirs[dirIndex*DIRS_ENTRY_LENGTH+1] != '\0'){
-      isEqual = isEqualPathName(path,dirs+dirIndex*DIRS_ENTRY_LENGTH+1);
+      isEqual = isEqualPathName(inpath,dirs+dirIndex*DIRS_ENTRY_LENGTH+1);
       if (isEqual && dirs[dirIndex*DIRS_ENTRY_LENGTH] == parentIndex){
          *result = ALREADY_EXIST;
          return;
@@ -434,8 +432,8 @@ void makeDirectory(char *path, int *result, char parentIndex){
    clear(dirs+dirIndex*DIRS_ENTRY_LENGTH, DIRS_ENTRY_LENGTH);
    dirs[dirIndex*DIRS_ENTRY_LENGTH] = parentIndex;
    i = 0;
-   while (i < MAX_DIRNAME && path[i] != '\0'){
-      dirs[dirIndex*DIRS_ENTRY_LENGTH+i+1] = path[i];
+   while (i < MAX_DIRNAME && inpath[i] != '\0'){
+      dirs[dirIndex*DIRS_ENTRY_LENGTH+i+1] = inpath[i];
       i++;
    }
    *result = 0;
@@ -596,7 +594,7 @@ void putArgs (char curdir, char argc, char **argv) {
    args[1] = argc;
    i = 0;
    j = 0;
-   for (p = 1; p < ARGS_SECTOR && i < argc; ++p) {
+   for (p = 2; p < ARGS_SECTOR && i < argc; ++p) {
       args[p] = argv[i][j];
       if (argv[i][j] == '\0') {
          ++i;
@@ -629,7 +627,7 @@ void getArgv (char index, char *argv) {
 
    i = 0;
    j = 0;
-   for (p = 1; p < ARGS_SECTOR; ++p) {
+   for (p = 2; p < ARGS_SECTOR; ++p) {
       if (i == index) {
          argv[j] = args[p];
          ++j;
@@ -645,5 +643,6 @@ void getArgv (char index, char *argv) {
       }
    }
 } 
+
 
 

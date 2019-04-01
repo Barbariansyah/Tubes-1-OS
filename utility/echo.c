@@ -1,4 +1,4 @@
-int main(){
+void main(){
   int i;
   char argc;
   char argv[16];
