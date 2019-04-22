@@ -17,6 +17,7 @@ void main(){
   char dirName[SECTOR_SIZE];
   int resultDir;
   int resultFile;
+  enableInterrupts();
 
   interrupt(0x21, 0x21, &parentIndex, 0, 0);
   interrupt(0x21, 0x23, 0, argv, 0);
@@ -32,6 +33,7 @@ void main(){
     interrupt(0x21, 0x00, "\': No such file or directory", 0, 0);
     interrupt(0x21, 0x00, "\n\r", 0, 0);
   }
+  
   interrupt(0x21, 0x07, 0, 0, 0);
 }
 

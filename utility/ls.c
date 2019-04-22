@@ -10,6 +10,8 @@ void main(){
   int i;
   int parentIndex;
 
+  enableInterrupts();
+
   interrupt(0x21,0x02, dirs, DIRS_SECTOR, 0);
   interrupt(0x21,0x02, files, FILES_SECTOR, 0);
   interrupt(0x21,0x21, &parentIndex, 0, 0);

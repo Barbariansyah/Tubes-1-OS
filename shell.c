@@ -51,31 +51,29 @@ int main() {
 		for(i = 0; i < 16; i++) {
 			clear(argv[j], 16);
 		}
-		interrupt(0x21, 0x20, curdir, argc, argv);
 		clear(command,MAX_COMMAND);
 		clear(commandList,16*16);
 		clear(path,512);
 
-		interrupt(0x21, 0x1, command, 0, 0);
-		splitCommand(command, commandList, &num_command); 
+		interrupt(0x21, 0x1, command, 1, 0);
+		splitCommand(command, commandList, &num_command);
 		
-		if(strCmp(commandList[0], "cd", 2)) {
-			strCopy(commandList[1], path, 0);
-			parentIdx = curdir;
-			// mengecek apakah directory sudah benar dan path sekarang berisi nama directory terakhir yang jika ditemukan
-			relPathToAbsPath(path, &parentIdx, &found);
-			if(found == 0) {
-				changeCurDir(path, &curdir, parentIdx);
-				result = 1;
-			}
-			else {
-				interrupt(0x21, 0x0, "Directory not found \n", 0, 0);
-				result = 0;
-			}
-		}
-		else if (strCmp(commandList[0], "./", 2)) {
-			// interrupt(0x21,(0xFF << 8) | 0x05,"uGkza4wj","K301/in/code.txt",&sectors);
-			// interrupt(0x21,(0xFF << 8) | 0x05,"uGkza4wj","in",&sectors);
+		// if(strCmp(commandList[0], "cd", 2)) {
+			// strCopy(commandList[1], path, 0);
+			// parentIdx = curdir;
+			// // mengecek apakah directory sudah benar dan path sekarang berisi nama directory terakhir yang jika ditemukan
+			// relPathToAbsPath(path, &parentIdx, &found);
+			// if(found == 0) {
+			// 	changeCurDir(path, &curdir, parentIdx);
+			// 	result = 1;
+			// }
+			// else {
+			// 	interrupt(0x21, 0x0, "Directory not found \n\r", 0, 0);
+			// 	result = 0;
+			// }
+		// }else 
+		if (strCmp(commandList[0], "./", 2)) {
+			interrupt(0x21, 0x0, "Else IF \n\r",0,0);
 			strCopy(commandList[0], path, 2);
 			argc = num_command;
 			for(i = 1; i < num_command; i++) {
@@ -83,16 +81,15 @@ int main() {
 				argv[j] = commandList[i];
 			}
 			interrupt(0x21, 0x20, curdir, argc, argv);
-			interrupt(0x21, (curdir << 8) | 0x06, path, 0x2001, &result);
-		}
-		else {
+			interrupt(0x21, (curdir << 8) | 0x06, commandList[0], &result, 0);
+		}else{
 			argc = num_command-1;
 			for(i = 1; i < num_command; i++) {
 				j = i - 1;
 				argv[j] = commandList[i];
 			}
 			interrupt(0x21, 0x20, curdir, argc, argv);
-			interrupt(0x21, (0xFF << 8) | 0x06, commandList[0], 0x2000, &result);
+			interrupt(0x21, (0xFF << 8) | 0x06, commandList[0], &result, 0);
 		}
 		
 		if(!result) {

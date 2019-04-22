@@ -32,37 +32,37 @@
 00000000000i[     ]   SB16 support: yes
 00000000000i[     ]   USB support: yes
 00000000000i[     ]   VGA extension support: vbe cirrus
-00000000000i[MEM0 ] allocated memory at 0x7f3e67937010. after alignment, vector=0x7f3e67938000
+00000000000i[MEM0 ] allocated memory at 0x7fb943c43010. after alignment, vector=0x7fb943c44000
 00000000000i[MEM0 ] 32.00MB
 00000000000i[MEM0 ] mem block size = 0x00100000, blocks=32
 00000000000i[MEM0 ] rom at 0xfffe0000/131072 ('/usr/share/bochs/BIOS-bochs-latest')
-00000000000i[     ] lt_dlhandle is 0x5588851387f0
+00000000000i[     ] lt_dlhandle is 0x5615ae8d9830
 00000000000i[PLGIN] loaded plugin libbx_hdimage.so
-00000000000i[     ] lt_dlhandle is 0x5588852fd3b0
+00000000000i[     ] lt_dlhandle is 0x5615aea9e3f0
 00000000000i[PLGIN] loaded plugin libbx_pci.so
-00000000000i[     ] lt_dlhandle is 0x5588852fdf40
+00000000000i[     ] lt_dlhandle is 0x5615aea9ef80
 00000000000i[PLGIN] loaded plugin libbx_pci2isa.so
-00000000000i[     ] lt_dlhandle is 0x5588852fe950
+00000000000i[     ] lt_dlhandle is 0x5615aea9f990
 00000000000i[PLGIN] loaded plugin libbx_acpi.so
-00000000000i[     ] lt_dlhandle is 0x5588852ff360
+00000000000i[     ] lt_dlhandle is 0x5615aeaa03a0
 00000000000i[PLGIN] loaded plugin libbx_cmos.so
-00000000000i[     ] lt_dlhandle is 0x5588852ffca0
+00000000000i[     ] lt_dlhandle is 0x5615aeaa0ce0
 00000000000i[PLGIN] loaded plugin libbx_dma.so
-00000000000i[     ] lt_dlhandle is 0x558885300740
+00000000000i[     ] lt_dlhandle is 0x5615aeaa1780
 00000000000i[PLGIN] loaded plugin libbx_pic.so
-00000000000i[     ] lt_dlhandle is 0x558885300ff0
+00000000000i[     ] lt_dlhandle is 0x5615aeaa2030
 00000000000i[PLGIN] loaded plugin libbx_pit.so
-00000000000i[     ] lt_dlhandle is 0x558885301a30
+00000000000i[     ] lt_dlhandle is 0x5615aeaa2a70
 00000000000i[PLGIN] loaded plugin libbx_floppy.so
-00000000000i[     ] lt_dlhandle is 0x558885302630
+00000000000i[     ] lt_dlhandle is 0x5615aeaa3670
 00000000000i[PLGIN] loaded plugin libbx_vga.so
-00000000000i[     ] lt_dlhandle is 0x558885302ea0
+00000000000i[     ] lt_dlhandle is 0x5615aeaa3ee0
 00000000000i[PLGIN] loaded plugin libbx_ioapic.so
-00000000000i[     ] lt_dlhandle is 0x5588853036f0
+00000000000i[     ] lt_dlhandle is 0x5615aeaa4730
 00000000000i[PLGIN] loaded plugin libbx_keyboard.so
-00000000000i[     ] lt_dlhandle is 0x558885304080
+00000000000i[     ] lt_dlhandle is 0x5615aeaa50c0
 00000000000i[PLGIN] loaded plugin libbx_harddrv.so
-00000000000i[     ] lt_dlhandle is 0x5588853161b0
+00000000000i[     ] lt_dlhandle is 0x5615aeab71f0
 00000000000i[PLGIN] loaded plugin libbx_pci_ide.so
 00000000000i[PLGIN] init_dev of 'pci' plugin device by virtual method
 00000000000i[PCI  ] 440FX Host bridge present at device 0, function 0
@@ -70,7 +70,7 @@
 00000000000i[PCI  ] PIIX3 PCI-to-ISA bridge present at device 1, function 0
 00000000000i[PLGIN] init_dev of 'cmos' plugin device by virtual method
 00000000000i[CMOS ] Using local time for initial clock
-00000000000i[CMOS ] Setting initial clock to: Mon Apr  1 18:46:59 2019 (time0=1554119219)
+00000000000i[CMOS ] Setting initial clock to: Mon Apr 22 15:23:08 2019 (time0=1555921388)
 00000000000i[PLGIN] init_dev of 'dma' plugin device by virtual method
 00000000000i[DMA  ] channel 4 used by cascade
 00000000000i[PLGIN] init_dev of 'pic' plugin device by virtual method
@@ -172,66 +172,217 @@
 00000000000i[XGUI ] Mouse capture off
 00000000025i[MEM0 ] allocate_block: block=0x0 used 0x1 of 0x20
 00000004661i[BIOS ] $Revision: 11318 $ $Date: 2012-08-06 19:59:54 +0200 (Mo, 06. Aug 2012) $
-00000330063i[KBD  ] reset-disable command received
-00000335800i[BIOS ] Starting rombios32
-00000336257i[BIOS ] Shutdown flag 0
-00000336870i[BIOS ] ram_size=0x02000000
-00000337316i[BIOS ] ram_end=32MB
-00000437261i[BIOS ] Found 1 cpu(s)
-00000451459i[BIOS ] bios_table_addr: 0x000fa438 end=0x000fcc00
-00000779264i[PCI  ] 440FX PMC write to PAM register 59 (TLB Flush)
-00001107202i[P2I  ] PCI IRQ routing: PIRQA# set to 0x0b
-00001107227i[P2I  ] PCI IRQ routing: PIRQB# set to 0x09
-00001107252i[P2I  ] PCI IRQ routing: PIRQC# set to 0x0b
-00001107277i[P2I  ] PCI IRQ routing: PIRQD# set to 0x09
-00001107287i[P2I  ] write: ELCR2 = 0x0a
-00001108081i[BIOS ] PIIX3/PIIX4 init: elcr=00 0a
-00001115807i[BIOS ] PCI: bus=0 devfn=0x00: vendor_id=0x8086 device_id=0x1237 class=0x0600
-00001118119i[BIOS ] PCI: bus=0 devfn=0x08: vendor_id=0x8086 device_id=0x7000 class=0x0601
-00001120270i[BIOS ] PCI: bus=0 devfn=0x09: vendor_id=0x8086 device_id=0x7010 class=0x0101
-00001120500i[PIDE ] new BM-DMA address: 0xc000
-00001121137i[BIOS ] region 4: 0x0000c000
-00001123207i[BIOS ] PCI: bus=0 devfn=0x0b: vendor_id=0x8086 device_id=0x7113 class=0x0680
-00001123438i[ACPI ] new irq line = 11
-00001123455i[ACPI ] new irq line = 9
-00001123489i[ACPI ] new PM base address: 0xb000
-00001123503i[ACPI ] new SM base address: 0xb100
-00001123530i[PCI  ] setting SMRAM control register to 0x4a
-00001287670i[CPU0 ] Enter to System Management Mode
-00001287670i[CPU0 ] enter_system_management_mode: temporary disable VMX while in SMM mode
-00001287680i[CPU0 ] RSM: Resuming from System Management Mode
-00001451738i[PCI  ] setting SMRAM control register to 0x0a
-00001466608i[BIOS ] MP table addr=0x000fa510 MPC table addr=0x000fa440 size=0xc8
-00001468351i[BIOS ] SMBIOS table addr=0x000fa520
-00001468419i[MEM0 ] allocate_block: block=0x1f used 0x2 of 0x20
-00001471273i[BIOS ] Firmware waking vector 0x1ff00cc
-00001476112i[BIOS ] ACPI tables: RSDP addr=0x000fa640 ACPI DATA addr=0x01ff0000 size=0x1f22
-00001476149i[PCI  ] 440FX PMC write to PAM register 59 (TLB Flush)
-00001476890i[BIOS ] bios_table_cur_addr: 0x000fa664
-00001604510i[VBIOS] VGABios $Id: vgabios.c,v 1.75 2011/10/15 14:07:21 vruppert Exp $
-00001604581i[BXVGA] VBE known Display Interface b0c0
-00001604613i[BXVGA] VBE known Display Interface b0c5
-00001607538i[VBIOS] VBE Bios $Id: vbe.c,v 1.64 2011/07/19 18:25:05 vruppert Exp $
-00003333334i[XGUI ] charmap update. Font Height is 16
-00032315166i[BIOS ] Booting from 0000:7c00
-01962960000p[XGUI ] >>PANIC<< POWER button turned off.
-01962960000i[CPU0 ] CPU is in real mode (active)
-01962960000i[CPU0 ] CS.mode = 16 bit
-01962960000i[CPU0 ] SS.mode = 16 bit
-01962960000i[CPU0 ] EFER   = 0x00000000
-01962960000i[CPU0 ] | EAX=00000020  EBX=00000000  ECX=00090000  EDX=00000000
-01962960000i[CPU0 ] | ESP=0000d851  EBP=0000d86b  ESI=000e13fe  EDI=0000ffac
-01962960000i[CPU0 ] | IOPL=0 id vip vif ac vm rf nt of df IF tf sf ZF af PF cf
-01962960000i[CPU0 ] | SEG sltr(index|ti|rpl)     base    limit G D
-01962960000i[CPU0 ] |  CS:f000( 0004| 0|  0) 000f0000 0000ffff 0 0
-01962960000i[CPU0 ] |  DS:0040( 0005| 0|  0) 00000400 0000ffff 0 0
-01962960000i[CPU0 ] |  SS:2000( 0005| 0|  0) 00020000 0000ffff 0 0
-01962960000i[CPU0 ] |  ES:2000( 0005| 0|  0) 00020000 0000ffff 0 0
-01962960000i[CPU0 ] |  FS:0000( 0005| 0|  0) 00000000 0000ffff 0 0
-01962960000i[CPU0 ] |  GS:0000( 0005| 0|  0) 00000000 0000ffff 0 0
-01962960000i[CPU0 ] | EIP=0000e874 (0000e874)
-01962960000i[CPU0 ] | CR0=0x60000010 CR2=0x00000000
-01962960000i[CPU0 ] | CR3=0x00000000 CR4=0x00000000
-01962960000i[CMOS ] Last time is 1554119415 (Mon Apr  1 18:50:15 2019)
-01962960000i[XGUI ] Exit
-01962960000i[CTRL ] quit_sim called with exit code 1
+00000320062i[KBD  ] reset-disable command received
+00000325799i[BIOS ] Starting rombios32
+00000326256i[BIOS ] Shutdown flag 0
+00000326869i[BIOS ] ram_size=0x02000000
+00000327315i[BIOS ] ram_end=32MB
+00000427359i[BIOS ] Found 1 cpu(s)
+00000441557i[BIOS ] bios_table_addr: 0x000fa438 end=0x000fcc00
+00000769362i[PCI  ] 440FX PMC write to PAM register 59 (TLB Flush)
+00001097300i[P2I  ] PCI IRQ routing: PIRQA# set to 0x0b
+00001097325i[P2I  ] PCI IRQ routing: PIRQB# set to 0x09
+00001097350i[P2I  ] PCI IRQ routing: PIRQC# set to 0x0b
+00001097375i[P2I  ] PCI IRQ routing: PIRQD# set to 0x09
+00001097385i[P2I  ] write: ELCR2 = 0x0a
+00001098179i[BIOS ] PIIX3/PIIX4 init: elcr=00 0a
+00001105905i[BIOS ] PCI: bus=0 devfn=0x00: vendor_id=0x8086 device_id=0x1237 class=0x0600
+00001108217i[BIOS ] PCI: bus=0 devfn=0x08: vendor_id=0x8086 device_id=0x7000 class=0x0601
+00001110368i[BIOS ] PCI: bus=0 devfn=0x09: vendor_id=0x8086 device_id=0x7010 class=0x0101
+00001110598i[PIDE ] new BM-DMA address: 0xc000
+00001111235i[BIOS ] region 4: 0x0000c000
+00001113305i[BIOS ] PCI: bus=0 devfn=0x0b: vendor_id=0x8086 device_id=0x7113 class=0x0680
+00001113536i[ACPI ] new irq line = 11
+00001113553i[ACPI ] new irq line = 9
+00001113587i[ACPI ] new PM base address: 0xb000
+00001113601i[ACPI ] new SM base address: 0xb100
+00001113628i[PCI  ] setting SMRAM control register to 0x4a
+00001277768i[CPU0 ] Enter to System Management Mode
+00001277768i[CPU0 ] enter_system_management_mode: temporary disable VMX while in SMM mode
+00001277778i[CPU0 ] RSM: Resuming from System Management Mode
+00001441836i[PCI  ] setting SMRAM control register to 0x0a
+00001456706i[BIOS ] MP table addr=0x000fa510 MPC table addr=0x000fa440 size=0xc8
+00001458449i[BIOS ] SMBIOS table addr=0x000fa520
+00001458517i[MEM0 ] allocate_block: block=0x1f used 0x2 of 0x20
+00001461371i[BIOS ] Firmware waking vector 0x1ff00cc
+00001466210i[BIOS ] ACPI tables: RSDP addr=0x000fa640 ACPI DATA addr=0x01ff0000 size=0x1f22
+00001466247i[PCI  ] 440FX PMC write to PAM register 59 (TLB Flush)
+00001466988i[BIOS ] bios_table_cur_addr: 0x000fa664
+00001594608i[VBIOS] VGABios $Id: vgabios.c,v 1.75 2011/10/15 14:07:21 vruppert Exp $
+00001594679i[BXVGA] VBE known Display Interface b0c0
+00001594711i[BXVGA] VBE known Display Interface b0c5
+00001597636i[VBIOS] VBE Bios $Id: vbe.c,v 1.64 2011/07/19 18:25:05 vruppert Exp $
+00003333332i[XGUI ] charmap update. Font Height is 16
+00032315164i[BIOS ] Booting from 0000:7c00
+00035122497i[CPU0 ] math_abort: MSDOS compatibility FPU exception
+00035122508i[CPU0 ] math_abort: MSDOS compatibility FPU exception
+00035122514i[CPU0 ] math_abort: MSDOS compatibility FPU exception
+00035122525i[CPU0 ] math_abort: MSDOS compatibility FPU exception
+00035122531i[CPU0 ] math_abort: MSDOS compatibility FPU exception
+00035122542i[CPU0 ] math_abort: MSDOS compatibility FPU exception
+00035122548i[CPU0 ] math_abort: MSDOS compatibility FPU exception
+00035122559i[CPU0 ] math_abort: MSDOS compatibility FPU exception
+00035122565i[CPU0 ] math_abort: MSDOS compatibility FPU exception
+00035122576i[CPU0 ] math_abort: MSDOS compatibility FPU exception
+00035122582i[CPU0 ] math_abort: MSDOS compatibility FPU exception
+00035122593i[CPU0 ] math_abort: MSDOS compatibility FPU exception
+00035122599i[CPU0 ] math_abort: MSDOS compatibility FPU exception
+00035122610i[CPU0 ] math_abort: MSDOS compatibility FPU exception
+00035122616i[CPU0 ] math_abort: MSDOS compatibility FPU exception
+00035122627i[CPU0 ] math_abort: MSDOS compatibility FPU exception
+00035122633i[CPU0 ] math_abort: MSDOS compatibility FPU exception
+00035122644i[CPU0 ] math_abort: MSDOS compatibility FPU exception
+00035122650i[CPU0 ] math_abort: MSDOS compatibility FPU exception
+00035122661i[CPU0 ] math_abort: MSDOS compatibility FPU exception
+00035122667i[CPU0 ] math_abort: MSDOS compatibility FPU exception
+00035122678i[CPU0 ] math_abort: MSDOS compatibility FPU exception
+00035122684i[CPU0 ] math_abort: MSDOS compatibility FPU exception
+00035122695i[CPU0 ] math_abort: MSDOS compatibility FPU exception
+00035122701i[CPU0 ] math_abort: MSDOS compatibility FPU exception
+00035122712i[CPU0 ] math_abort: MSDOS compatibility FPU exception
+00035122718i[CPU0 ] math_abort: MSDOS compatibility FPU exception
+00035122729i[CPU0 ] math_abort: MSDOS compatibility FPU exception
+00035122735i[CPU0 ] math_abort: MSDOS compatibility FPU exception
+00035122746i[CPU0 ] math_abort: MSDOS compatibility FPU exception
+00035122752i[CPU0 ] math_abort: MSDOS compatibility FPU exception
+00344317614i[CPU0 ] math_abort: MSDOS compatibility FPU exception
+00344317620i[CPU0 ] math_abort: MSDOS compatibility FPU exception
+00344317631i[CPU0 ] math_abort: MSDOS compatibility FPU exception
+00344317637i[CPU0 ] math_abort: MSDOS compatibility FPU exception
+00344317648i[CPU0 ] math_abort: MSDOS compatibility FPU exception
+00344317654i[CPU0 ] math_abort: MSDOS compatibility FPU exception
+00344317665i[CPU0 ] math_abort: MSDOS compatibility FPU exception
+00344317671i[CPU0 ] math_abort: MSDOS compatibility FPU exception
+00344317682i[CPU0 ] math_abort: MSDOS compatibility FPU exception
+00344317688i[CPU0 ] math_abort: MSDOS compatibility FPU exception
+00344317699i[CPU0 ] math_abort: MSDOS compatibility FPU exception
+00344317705i[CPU0 ] math_abort: MSDOS compatibility FPU exception
+00344317716i[CPU0 ] math_abort: MSDOS compatibility FPU exception
+00344317722i[CPU0 ] math_abort: MSDOS compatibility FPU exception
+00344317733i[CPU0 ] math_abort: MSDOS compatibility FPU exception
+00344317739i[CPU0 ] math_abort: MSDOS compatibility FPU exception
+00344317750i[CPU0 ] math_abort: MSDOS compatibility FPU exception
+00344317756i[CPU0 ] math_abort: MSDOS compatibility FPU exception
+00344317767i[CPU0 ] math_abort: MSDOS compatibility FPU exception
+00344317773i[CPU0 ] math_abort: MSDOS compatibility FPU exception
+00344317784i[CPU0 ] math_abort: MSDOS compatibility FPU exception
+00344317790i[CPU0 ] math_abort: MSDOS compatibility FPU exception
+00344317801i[CPU0 ] math_abort: MSDOS compatibility FPU exception
+00344317807i[CPU0 ] math_abort: MSDOS compatibility FPU exception
+00344317818i[CPU0 ] math_abort: MSDOS compatibility FPU exception
+00344317824i[CPU0 ] math_abort: MSDOS compatibility FPU exception
+00344317835i[CPU0 ] math_abort: MSDOS compatibility FPU exception
+00344317841i[CPU0 ] math_abort: MSDOS compatibility FPU exception
+00344317852i[CPU0 ] math_abort: MSDOS compatibility FPU exception
+00344317858i[CPU0 ] math_abort: MSDOS compatibility FPU exception
+01922982425i[CPU0 ] math_abort: MSDOS compatibility FPU exception
+01922982431i[CPU0 ] math_abort: MSDOS compatibility FPU exception
+01922982442i[CPU0 ] math_abort: MSDOS compatibility FPU exception
+01922982448i[CPU0 ] math_abort: MSDOS compatibility FPU exception
+01922982459i[CPU0 ] math_abort: MSDOS compatibility FPU exception
+01922982465i[CPU0 ] math_abort: MSDOS compatibility FPU exception
+01922982476i[CPU0 ] math_abort: MSDOS compatibility FPU exception
+01922982482i[CPU0 ] math_abort: MSDOS compatibility FPU exception
+01922982493i[CPU0 ] math_abort: MSDOS compatibility FPU exception
+01922982499i[CPU0 ] math_abort: MSDOS compatibility FPU exception
+01922982510i[CPU0 ] math_abort: MSDOS compatibility FPU exception
+01922982516i[CPU0 ] math_abort: MSDOS compatibility FPU exception
+01922982527i[CPU0 ] math_abort: MSDOS compatibility FPU exception
+01922982533i[CPU0 ] math_abort: MSDOS compatibility FPU exception
+01922982544i[CPU0 ] math_abort: MSDOS compatibility FPU exception
+01922982550i[CPU0 ] math_abort: MSDOS compatibility FPU exception
+01922982561i[CPU0 ] math_abort: MSDOS compatibility FPU exception
+01922982567i[CPU0 ] math_abort: MSDOS compatibility FPU exception
+01922982578i[CPU0 ] math_abort: MSDOS compatibility FPU exception
+01922982584i[CPU0 ] math_abort: MSDOS compatibility FPU exception
+01922982595i[CPU0 ] math_abort: MSDOS compatibility FPU exception
+01922982601i[CPU0 ] math_abort: MSDOS compatibility FPU exception
+01922982612i[CPU0 ] math_abort: MSDOS compatibility FPU exception
+01922982618i[CPU0 ] math_abort: MSDOS compatibility FPU exception
+01922982629i[CPU0 ] math_abort: MSDOS compatibility FPU exception
+01922982635i[CPU0 ] math_abort: MSDOS compatibility FPU exception
+01922982646i[CPU0 ] math_abort: MSDOS compatibility FPU exception
+01922982652i[CPU0 ] math_abort: MSDOS compatibility FPU exception
+01922982663i[CPU0 ] math_abort: MSDOS compatibility FPU exception
+01922982669i[CPU0 ] math_abort: MSDOS compatibility FPU exception
+04190304901i[CPU0 ] math_abort: MSDOS compatibility FPU exception
+04190304907i[CPU0 ] math_abort: MSDOS compatibility FPU exception
+04190304918i[CPU0 ] math_abort: MSDOS compatibility FPU exception
+04190304924i[CPU0 ] math_abort: MSDOS compatibility FPU exception
+04190304935i[CPU0 ] math_abort: MSDOS compatibility FPU exception
+04190304941i[CPU0 ] math_abort: MSDOS compatibility FPU exception
+04190304952i[CPU0 ] math_abort: MSDOS compatibility FPU exception
+04190304958i[CPU0 ] math_abort: MSDOS compatibility FPU exception
+04190304969i[CPU0 ] math_abort: MSDOS compatibility FPU exception
+04190304975i[CPU0 ] math_abort: MSDOS compatibility FPU exception
+04190304986i[CPU0 ] math_abort: MSDOS compatibility FPU exception
+04190304992i[CPU0 ] math_abort: MSDOS compatibility FPU exception
+04190305003i[CPU0 ] math_abort: MSDOS compatibility FPU exception
+04190305009i[CPU0 ] math_abort: MSDOS compatibility FPU exception
+04190305020i[CPU0 ] math_abort: MSDOS compatibility FPU exception
+04190305026i[CPU0 ] math_abort: MSDOS compatibility FPU exception
+04190305037i[CPU0 ] math_abort: MSDOS compatibility FPU exception
+04190305043i[CPU0 ] math_abort: MSDOS compatibility FPU exception
+04190305054i[CPU0 ] math_abort: MSDOS compatibility FPU exception
+04190305060i[CPU0 ] math_abort: MSDOS compatibility FPU exception
+04190305071i[CPU0 ] math_abort: MSDOS compatibility FPU exception
+04190305077i[CPU0 ] math_abort: MSDOS compatibility FPU exception
+04190305088i[CPU0 ] math_abort: MSDOS compatibility FPU exception
+04190305094i[CPU0 ] math_abort: MSDOS compatibility FPU exception
+04190305105i[CPU0 ] math_abort: MSDOS compatibility FPU exception
+04190305111i[CPU0 ] math_abort: MSDOS compatibility FPU exception
+04190305122i[CPU0 ] math_abort: MSDOS compatibility FPU exception
+04190305128i[CPU0 ] math_abort: MSDOS compatibility FPU exception
+04190305139i[CPU0 ] math_abort: MSDOS compatibility FPU exception
+04190305145i[CPU0 ] math_abort: MSDOS compatibility FPU exception
+08459705193i[CPU0 ] math_abort: MSDOS compatibility FPU exception
+08459705199i[CPU0 ] math_abort: MSDOS compatibility FPU exception
+08459705210i[CPU0 ] math_abort: MSDOS compatibility FPU exception
+08459705216i[CPU0 ] math_abort: MSDOS compatibility FPU exception
+08459705227i[CPU0 ] math_abort: MSDOS compatibility FPU exception
+08459705233i[CPU0 ] math_abort: MSDOS compatibility FPU exception
+08459705244i[CPU0 ] math_abort: MSDOS compatibility FPU exception
+08459705250i[CPU0 ] math_abort: MSDOS compatibility FPU exception
+08459705261i[CPU0 ] math_abort: MSDOS compatibility FPU exception
+08459705267i[CPU0 ] math_abort: MSDOS compatibility FPU exception
+08459705278i[CPU0 ] math_abort: MSDOS compatibility FPU exception
+08459705284i[CPU0 ] math_abort: MSDOS compatibility FPU exception
+08459705295i[CPU0 ] math_abort: MSDOS compatibility FPU exception
+08459705301i[CPU0 ] math_abort: MSDOS compatibility FPU exception
+08459705312i[CPU0 ] math_abort: MSDOS compatibility FPU exception
+08459705318i[CPU0 ] math_abort: MSDOS compatibility FPU exception
+08459705329i[CPU0 ] math_abort: MSDOS compatibility FPU exception
+08459705335i[CPU0 ] math_abort: MSDOS compatibility FPU exception
+08459705346i[CPU0 ] math_abort: MSDOS compatibility FPU exception
+08459705352i[CPU0 ] math_abort: MSDOS compatibility FPU exception
+08459705363i[CPU0 ] math_abort: MSDOS compatibility FPU exception
+08459705369i[CPU0 ] math_abort: MSDOS compatibility FPU exception
+08459705380i[CPU0 ] math_abort: MSDOS compatibility FPU exception
+08459705386i[CPU0 ] math_abort: MSDOS compatibility FPU exception
+08459705397i[CPU0 ] math_abort: MSDOS compatibility FPU exception
+08459705403i[CPU0 ] math_abort: MSDOS compatibility FPU exception
+08459705414i[CPU0 ] math_abort: MSDOS compatibility FPU exception
+08459705420i[CPU0 ] math_abort: MSDOS compatibility FPU exception
+08459705431i[CPU0 ] math_abort: MSDOS compatibility FPU exception
+08459705437i[CPU0 ] math_abort: MSDOS compatibility FPU exception
+08548910000p[XGUI ] >>PANIC<< POWER button turned off.
+08548910000i[CPU0 ] CPU is in real mode (active)
+08548910000i[CPU0 ] CS.mode = 16 bit
+08548910000i[CPU0 ] SS.mode = 16 bit
+08548910000i[CPU0 ] EFER   = 0x00000000
+08548910000i[CPU0 ] | EAX=0000003a  EBX=00000000  ECX=00090000  EDX=00000000
+08548910000i[CPU0 ] | ESP=0000d731  EBP=0000d74b  ESI=000e16fa  EDI=0000fffb
+08548910000i[CPU0 ] | IOPL=0 id vip vif ac vm rf nt of df if tf sf ZF af PF cf
+08548910000i[CPU0 ] | SEG sltr(index|ti|rpl)     base    limit G D
+08548910000i[CPU0 ] |  CS:f000( 0004| 0|  0) 000f0000 0000ffff 0 0
+08548910000i[CPU0 ] |  DS:0040( 0005| 0|  0) 00000400 0000ffff 0 0
+08548910000i[CPU0 ] |  SS:2000( 0005| 0|  0) 00020000 0000ffff 0 0
+08548910000i[CPU0 ] |  ES:2000( 0005| 0|  0) 00020000 0000ffff 0 0
+08548910000i[CPU0 ] |  FS:0000( 0005| 0|  0) 00000000 0000ffff 0 0
+08548910000i[CPU0 ] |  GS:0000( 0005| 0|  0) 00000000 0000ffff 0 0
+08548910000i[CPU0 ] | EIP=0000e86d (0000e86d)
+08548910000i[CPU0 ] | CR0=0x60000010 CR2=0x00000000
+08548910000i[CPU0 ] | CR3=0x00000000 CR4=0x00000000
+08548910000i[CMOS ] Last time is 1555922242 (Mon Apr 22 15:37:22 2019)
+08548910000i[XGUI ] Exit
+08548910000i[CTRL ] quit_sim called with exit code 1

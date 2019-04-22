@@ -18,7 +18,8 @@ void main(){
   char parentIndex, argc;
   char filename[SECTOR_SIZE];
   int i, j, result;
-
+  enableInterrupts();
+  
   i = 0;
   j = 0;
   interrupt(0x21,0x21, &parentIndex, 0, 0);
