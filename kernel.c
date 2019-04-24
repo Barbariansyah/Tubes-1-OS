@@ -70,6 +70,7 @@ int isEqualPathName(char *path1, char *path2);
 void relPathToAbsPath(char *path, char *parentIndex, int *success);
 void deleteFileByParentId(char parentIndex);
 void deleteDirectoryByParentId(char parentIndex);
+void getPCBbySegment(int segment, struct PCB *pcb);
 
 int main() {
    //interrupt(0x21, (AH << 8) | AL, BX, CX, DX);
@@ -212,9 +213,9 @@ void readString(char *string, int disableProcessControls){
          interrupt(0x10, 0xE00 + '\b', 0, 0, 0);
          interrupt(0x10, 0xE00 + '\0', 0, 0, 0);
          interrupt(0x10, 0xE00 + '\b', 0, 0, 0);
-      }else if (c == 0x03 && !disableProcessControls){
+      }else if (c == 0x03 && !disableProcessControls){ //Ctrl + C
          terminateProgram(0);
-      }else if (c == 0x1A && !disableProcessControls){
+      }else if (c == 0x1A && !disableProcessControls){ //Ctrl + Z
          sleep();
          resumeProcess(SEGMENT0, 0);
       }else if (c != '\b'){ //Karakter lain
@@ -787,6 +788,7 @@ void resumeProcess (int segment, int *result) {
   if (pcb != NULL && pcb->state == PAUSED) {
     pcb->state = READY;
     addToReady(pcb);
+    running->state = PAUSED;
     res = SUCCESS;
   } else {
     res = NOT_FOUND;
@@ -812,6 +814,10 @@ void killProcess (int segment, int *result) {
 
   restoreDataSegment();
   *result = res;
+}
+
+void getPCBbySegment(int segment, struct PCB *pcb){
+   pcb = getPCBOfSegment(segment);
 }
 
 

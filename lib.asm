@@ -5,6 +5,8 @@
 
 	.global _interrupt
 	.global _enableInterrupts
+	.global _setKernelDataSegment
+	.global _restoreDataSegment
 
 ;int interrupt (int number, int AX, int BX, int CX, int DX)
 _interrupt:
@@ -34,4 +36,22 @@ intr:	int #0x00	;call the interrupt (00 will be changed above)
 ;call at the beginning of programs.  allows timer preemption
 _enableInterrupts:
 	sti
+	ret
+
+;void setKernelDataSegment()
+;sets the data segment to the kernel, saving the current ds on the stack
+_setKernelDataSegment:
+	pop bx
+	push ds
+	push bx
+	mov ax,#0x1000
+	mov ds,ax
+	ret
+
+;void restoreDataSegment()
+;restores the data segment
+_restoreDataSegment:
+	pop bx
+	pop ds
+	push bx
 	ret

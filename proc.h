@@ -133,5 +133,4 @@ void addToReady(struct PCB *pcb);
 struct PCB *removeFromReady();
 
 struct PCB *getPCBOfSegment(int segment);
-
 #endif

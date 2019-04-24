@@ -43,10 +43,10 @@ int main() {
 	int num_command;
 	int i,j;
 	int sectors = 1;
-	
+ 	
 	curdir = 0xFF;
 	while(1) {
-		interrupt(0x21, 0x0, "$ ", 0, 0);
+		interrupt(0x21, 0x0, "$", 0, 0);
 
 		for(i = 0; i < 16; i++) {
 			clear(argv[j], 16);
@@ -58,22 +58,20 @@ int main() {
 		interrupt(0x21, 0x1, command, 1, 0);
 		splitCommand(command, commandList, &num_command);
 		
-		// if(strCmp(commandList[0], "cd", 2)) {
-			// strCopy(commandList[1], path, 0);
-			// parentIdx = curdir;
-			// // mengecek apakah directory sudah benar dan path sekarang berisi nama directory terakhir yang jika ditemukan
-			// relPathToAbsPath(path, &parentIdx, &found);
-			// if(found == 0) {
-			// 	changeCurDir(path, &curdir, parentIdx);
-			// 	result = 1;
-			// }
-			// else {
-			// 	interrupt(0x21, 0x0, "Directory not found \n\r", 0, 0);
-			// 	result = 0;
-			// }
-		// }else 
-		if (strCmp(commandList[0], "./", 2)) {
-			interrupt(0x21, 0x0, "Else IF \n\r",0,0);
+		if(commandList[0][0] == 'c' && commandList[0][1] == 'd') {
+			strCopy(commandList[1], path, 0);
+			parentIdx = curdir;
+			// mengecek apakah directory sudah benar dan path sekarang berisi nama directory terakhir yang jika ditemukan
+			relPathToAbsPath(path, &parentIdx, &found);
+			if(found == 0) {
+				changeCurDir(path, &curdir, parentIdx);
+				result = 1;
+			}
+			else {
+				interrupt(0x21, 0x0, "Directory not found \n\r", 0, 0);
+				result = 0;
+			}
+		}else if (commandList[0][0] == '.' && commandList[0][1] == '/') {
 			strCopy(commandList[0], path, 2);
 			argc = num_command;
 			for(i = 1; i < num_command; i++) {
@@ -81,7 +79,13 @@ int main() {
 				argv[j] = commandList[i];
 			}
 			interrupt(0x21, 0x20, curdir, argc, argv);
-			interrupt(0x21, (curdir << 8) | 0x06, commandList[0], &result, 0);
+			interrupt(0x21, (curdir << 8) | 0x06, path, &result, 0);
+		}else if (commandList[0][0] == 'r' && commandList[0][1] == 'e' && commandList[0][2] == 's' && commandList[0][3] == '1'){
+			interrupt(0x21, 0x33, 0x3000, &result, 0);
+			result = !result;
+		}else if (commandList[0][0] == 'r' && commandList[0][1] == 'e' && commandList[0][2] == 's' && commandList[0][3] == '2'){
+			interrupt(0x21, 0x33, 0x4000, &result, 0);
+			result = !result;
 		}else{
 			argc = num_command-1;
 			for(i = 1; i < num_command; i++) {
@@ -165,6 +169,10 @@ void changeCurDir(char *path, char *curdir, char parentIndex) {
 		}else{
 		   i++;
 		}
+	}
+
+	if (path[0] == '.' && path[1] == '.' && parentIndex != 0xFF){
+		*curdir = dirs[parentIndex*MAX_DIRNAME];
 	}
 }
 

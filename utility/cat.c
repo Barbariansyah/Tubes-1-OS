@@ -30,7 +30,7 @@ void main(){
   if (argc == 1){
     //Read file
     interrupt(0x21, (parentIndex << 8) | 0x04, readbuffer, argv[0], &result);
-    if (result != 0){
+    if (result == -1){
       interrupt(0x21, 0x00, "cat: \'", 0, 0);
       interrupt(0x21, 0x00, filename, 0, 0);
       interrupt(0x21, 0x00, "\': No such file or directory", 0, 0);

@@ -23,6 +23,8 @@ bcc -ansi -c -o mkdir.o utility/mkdir.c
 ld86 -o mkdir -d mkdir.o lib_asm.o
 bcc -ansi -c -o rm.o utility/rm.c
 ld86 -o rm -d rm.o lib_asm.o
+bcc -ansi -c -o ps.o utility/ps.c
+ld86 -o ps -d ps.o lib_asm.o
 
 ./loadFile shell
 ./loadFile echo
@@ -30,6 +32,7 @@ ld86 -o rm -d rm.o lib_asm.o
 ./loadFile cat
 ./loadFile mkdir
 ./loadFile rm
+#./loadFile ps
 ./loadFile keyproc3a
 ./loadFile keyproc3b
 
