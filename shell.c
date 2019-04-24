@@ -42,11 +42,12 @@ int main() {
 	int found;
 	int num_command;
 	int i,j;
+	int addr;
 	int sectors = 1;
  	
 	curdir = 0xFF;
 	while(1) {
-		interrupt(0x21, 0x0, "$", 0, 0);
+		interrupt(0x21, 0x0, "$ ", 0, 0);
 
 		for(i = 0; i < 16; i++) {
 			clear(argv[j], 16);
@@ -80,12 +81,28 @@ int main() {
 			}
 			interrupt(0x21, 0x20, curdir, argc, argv);
 			interrupt(0x21, (curdir << 8) | 0x06, path, &result, 0);
-		}else if (commandList[0][0] == 'r' && commandList[0][1] == 'e' && commandList[0][2] == 's' && commandList[0][3] == '1'){
-			interrupt(0x21, 0x33, 0x3000, &result, 0);
+		}else if (commandList[0][0] == 'r' && commandList[0][1] == 'e' && commandList[0][2] == 's'){
+			addr = (commandList[1][0] - '0') * 0x1000 + 0x2000;
+			interrupt(0x21, 0x33, addr, &result, 0);
 			result = !result;
-		}else if (commandList[0][0] == 'r' && commandList[0][1] == 'e' && commandList[0][2] == 's' && commandList[0][3] == '2'){
-			interrupt(0x21, 0x33, 0x4000, &result, 0);
+		}else if (commandList[0][0] == 'k' && commandList[0][1] == 'i' && commandList[0][2] == 'l' && commandList[0][3] == 'l'){
+			addr = (commandList[1][0] - '0') * 0x1000 + 0x2000;
+			interrupt(0x21, 0x34, addr, &result, 0);
 			result = !result;
+		}else if (commandList[0][0] == 'p' && commandList[0][1] == 'a' && commandList[0][2] == 'u' && commandList[0][3] == 's' && commandList[0][4] == 'e'){
+			addr = (commandList[1][0] - '0') * 0x1000 + 0x2000;
+			interrupt(0x21, 0x32, addr, &result, 0);
+			result = !result;
+		}else if (commandList[num_command-1][0] == '&'){
+			//interrupt(0x10, 0xE00+'0'+num_command, 0, 0, 0);
+			for(i = 0; i < num_command-1; i++) {
+				interrupt(0x21, 0x0, "[",0,0);
+				interrupt(0x21, 0x0, commandList[i],0,0);
+				interrupt(0x21, 0x0, "]",0,0);
+				interrupt(0x21, 0x20, curdir, 0, 0);
+				interrupt(0x21, (0xFF << 8) | 0x06, commandList[i], &result, 0);
+				interrupt(0x21, (0xFF << 8) | 0x06, "shell\0", 0, 0);
+			}
 		}else{
 			argc = num_command-1;
 			for(i = 1; i < num_command; i++) {

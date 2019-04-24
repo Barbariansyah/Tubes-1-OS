@@ -70,7 +70,7 @@ int isEqualPathName(char *path1, char *path2);
 void relPathToAbsPath(char *path, char *parentIndex, int *success);
 void deleteFileByParentId(char parentIndex);
 void deleteDirectoryByParentId(char parentIndex);
-void getPCBbySegment(int segment, struct PCB *pcb);
+void printPCB(int segment);
 
 int main() {
    //interrupt(0x21, (AH << 8) | AL, BX, CX, DX);
@@ -816,8 +816,8 @@ void killProcess (int segment, int *result) {
   *result = res;
 }
 
-void getPCBbySegment(int segment, struct PCB *pcb){
-   pcb = getPCBOfSegment(segment);
+void printPCB(int segment){
+   getPCBOfSegment(segment);
 }
 
 
